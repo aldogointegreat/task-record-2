@@ -1,5 +1,14 @@
 /**
  * Exportar todos los modelos
  */
-export * from './actividad.model';
+
+// Tablas Maestras
+export * from './disciplina.model';
+export * from './rol.model';
+export * from './jerarquia.model';
+export * from './atributo.model';
+export * from './entrega.model';
+export * from './usuario.model';
+export * from './nivel.model';
+export * from './actividad-nivel.model';
 

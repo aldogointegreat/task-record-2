@@ -64,7 +64,14 @@ export function PaginationControls<TData extends object>({
         <Select
           value={String(table.getState().pagination.pageSize)}
           onValueChange={(value: string) => {
-            setPagination({ pageIndex: 0, pageSize: Number(value) });
+            const newPageSize = Number(value);
+            // Usar el método de la tabla para cambiar la paginación (dispara onPaginationChange)
+            table.setPagination({
+              pageIndex: 0,
+              pageSize: newPageSize,
+            });
+            // También actualizar el estado local para mantener sincronización
+            setPagination({ pageIndex: 0, pageSize: newPageSize });
           }}
         >
           <SelectTrigger className="w-20 h-8 text-sm">

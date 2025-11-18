@@ -69,14 +69,20 @@ export function useFormHandlers<TData extends object>() {
     }
     
     const typed = payload as TData;
-    await createForm.onSubmit(typed);
-    
-    const createMsg =
-      typeof createForm.successMessage === "function"
-        ? createForm.successMessage(typed)
-        : createForm.successMessage ?? "Creado exitosamente";
-    toast.success(createMsg);
-    setOpenCreate(false);
+    try {
+      await createForm.onSubmit(typed);
+      
+      const createMsg =
+        typeof createForm.successMessage === "function"
+          ? createForm.successMessage(typed)
+          : createForm.successMessage ?? "Creado exitosamente";
+      toast.success(createMsg);
+      setOpenCreate(false);
+    } catch (error) {
+      // Si hay un error, no cerrar el diálogo y no mostrar toast de éxito
+      // El error ya fue manejado en el handler (onSubmit)
+      // No hacer nada aquí, solo dejar que el error se propague
+    }
   };
 
   const requestDelete = (

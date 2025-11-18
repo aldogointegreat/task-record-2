@@ -21,12 +21,13 @@ const dragOverVariants = cva(
 
 interface TreeDataItem {
     id: string
-    name: string
+    name: string | React.ReactNode
     icon?: any
     selectedIcon?: any
     openIcon?: any
     children?: TreeDataItem[]
     actions?: React.ReactNode
+    metadata?: React.ReactNode | Record<string, any>
     onClick?: () => void
     draggable?: boolean
     droppable?: boolean
@@ -115,8 +116,8 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
             return ids
         }, [data, expandAll, initialSelectedItemId])
 
-        return (
-            <div className={cn('overflow-hidden relative', className)}>
+    return (
+        <div className={cn('overflow-x-auto overflow-y-auto relative', className)}>
                 <TreeItem
                     data={data}
                     ref={ref}
@@ -132,7 +133,7 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
                 />
                 <div
                     className='w-full h-[48px]'
-                    onDrop={(e) => { handleDrop({id: '', name: 'parent_div'})}}>
+                    onDrop={() => { handleDrop({id: '', name: 'parent_div'})}}>
 
                 </div>
             </div>
@@ -329,7 +330,9 @@ const TreeNode = ({
                                 isOpen={isExpanded}
                                 default={defaultNodeIcon}
                             />
-                            <span className="text-sm truncate">{item.name}</span>
+                            <span className="text-sm truncate flex-1">
+                              {typeof item.name === 'string' ? item.name : item.name}
+                            </span>
                         </div>
                         
                         <TreeActions isSelected={selectedItemId === item.id}>
@@ -438,7 +441,9 @@ const TreeLeaf = React.forwardRef<
                     isSelected={selectedItemId === item.id}
                     default={defaultLeafIcon}
                 />
-                <span className="flex-grow text-sm truncate">{item.name}</span>
+                <span className="grow text-sm truncate">
+                  {typeof item.name === 'string' ? item.name : item.name}
+                </span>
                 <TreeActions isSelected={selectedItemId === item.id && !item.disabled}>
                     {item.actions}
                 </TreeActions>

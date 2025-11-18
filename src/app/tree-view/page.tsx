@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { TreeView, TreeDataItem } from '@/components/tree-view';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -26,17 +26,20 @@ import {
   Clock,
 } from 'lucide-react';
 
-// Extender TreeDataItem con información detallada
-interface ExtendedTreeDataItem extends TreeDataItem {
-  metadata?: {
-    description?: string;
-    type?: string;
-    size?: string;
-    created?: string;
-    modified?: string;
-    tags?: string[];
-    components?: ComponentInfo[];
-  };
+// Tipo para metadata como objeto (compatibilidad hacia atrás)
+interface MetadataObject {
+  description?: string;
+  type?: string;
+  size?: string;
+  created?: string;
+  modified?: string;
+  tags?: string[];
+  components?: ComponentInfo[];
+}
+
+// Extender TreeDataItem con información detallada (ahora metadata ya soporta ambos tipos en TreeDataItem)
+type ExtendedTreeDataItem = TreeDataItem & {
+  metadata?: React.ReactNode | MetadataObject;
 }
 
 interface ComponentInfo {
@@ -47,9 +50,40 @@ interface ComponentInfo {
   properties?: Record<string, string>;
 }
 
+// Función helper para verificar si metadata es un objeto
+function isMetadataObject(metadata: React.ReactNode | MetadataObject | Record<string, unknown> | undefined): metadata is MetadataObject {
+  return metadata !== undefined && 
+         metadata !== null && 
+         typeof metadata === 'object' && 
+         !React.isValidElement(metadata) &&
+         ('description' in metadata || 'type' in metadata || 'size' in metadata || 'created' in metadata || 'modified' in metadata || 'tags' in metadata || 'components' in metadata);
+}
+
 // Componente de Panel de Información Expandible
 function ItemInfoPanel({ item }: { item: ExtendedTreeDataItem }) {
-  const metadata = item.metadata || {};
+  // Si metadata es un componente React, renderizarlo directamente
+  if (item.metadata && React.isValidElement(item.metadata)) {
+    return (
+      <div className="space-y-4">
+        {/* Header con icono y nombre */}
+        <div className="flex items-start gap-3 pb-4 border-b border-border">
+          {item.icon && (
+            <div className="p-2 rounded-lg bg-primary/10">
+              <item.icon className="h-5 w-5 text-primary" />
+            </div>
+          )}
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg">{item.name}</h3>
+          </div>
+        </div>
+        {/* Renderizar el componente metadata */}
+        <div>{item.metadata}</div>
+      </div>
+    );
+  }
+
+  // Si metadata es un objeto, usar la lógica anterior
+  const metadata = isMetadataObject(item.metadata) ? item.metadata : {};
 
   return (
     <div className="space-y-4">
@@ -406,6 +440,42 @@ export default function TreeViewPage() {
                 size: '45 KB',
                 tags: ['API', 'Docs'],
               },
+            },
+            {
+              id: '1-3-3',
+              name: 'Ejemplo con Componente',
+              icon: FileText,
+              metadata: (
+                <div className="space-y-3">
+                  <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <Info className="h-4 w-4" />
+                      Metadata Personalizada
+                    </h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Este es un ejemplo de metadata como componente React. 
+                      Puedes crear cualquier UI personalizada aquí.
+                    </p>
+                    <div className="flex gap-2">
+                      <span className="px-2 py-1 text-xs rounded-md bg-primary text-primary-foreground">
+                        Componente
+                      </span>
+                      <span className="px-2 py-1 text-xs rounded-md bg-secondary text-secondary-foreground">
+                        React
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-sm space-y-1">
+                    <p><strong>Ventajas:</strong></p>
+                    <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-2">
+                      <li>Total flexibilidad en el diseño</li>
+                      <li>Puedes usar hooks y estado</li>
+                      <li>Interactividad completa</li>
+                      <li>Reutilización de componentes</li>
+                    </ul>
+                  </div>
+                </div>
+              ),
             },
           ],
         },

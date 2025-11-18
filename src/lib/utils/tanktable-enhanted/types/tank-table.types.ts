@@ -79,6 +79,11 @@ export interface TankTableProps<TData extends object> {
   
   // Advanced filters
   advancedFilters?: AdvancedFiltersOptions;
+
+  // Server-side pagination
+  serverSidePagination?: boolean;
+  pageCount?: number; // Total de páginas cuando se usa server-side pagination
+  onPaginationChange?: (pagination: { pageIndex: number; pageSize: number }) => void;
 }
 
 // Column Visibility Types

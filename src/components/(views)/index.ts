@@ -1,5 +1,13 @@
 /**
  * Exportar todas las vistas
  */
-export * from './actividad/ActividadList';
+
+// Tablas Maestras
+export * from './(tables)/disciplina/DisciplinaList';
+export * from './(tables)/rol/RolList';
+export * from './(tables)/jerarquia/JerarquiaList';
+export * from './(tables)/atributo/AtributoList';
+export * from './(tables)/entrega/EntregaList';
+export * from './(tables)/usuario/UsuarioList';
+export * from './(tables)/nivel/NivelList';
 

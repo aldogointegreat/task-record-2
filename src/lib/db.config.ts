@@ -5,7 +5,7 @@
 export const dbConnectionString = {
   server: 'localhost',
   port: 1433,
-  database: 'TaskRecord',
+  database: 'TaskRecords',
   user: 'sa',
   password: 'Abcdefg123!',
   trustServerCertificate: true,

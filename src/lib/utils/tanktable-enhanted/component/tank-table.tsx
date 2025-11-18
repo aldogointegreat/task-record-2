@@ -11,7 +11,6 @@ import {
 import { Table } from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 
 // Import modular components
 import { SearchBar } from "./search-bar";
@@ -70,6 +69,9 @@ const TankTable = <TData extends object>({
   virtualization,
   columnVisibility,
   advancedFilters,
+  serverSidePagination = false,
+  pageCount,
+  onPaginationChange,
 }: TankTableProps<TData>) => {
   // Use custom hooks for state management
   const {
@@ -159,6 +161,20 @@ const TankTable = <TData extends object>({
   const error = loadingStates?.error;
   const loadingRows = loadingStates?.loadingRows ?? 5;
 
+  // Manejar cambios de paginación para server-side
+  const handlePaginationChange = (updater: any) => {
+    const newPagination = typeof updater === 'function' 
+      ? updater(pagination)
+      : updater;
+    
+    setPagination(newPagination);
+    
+    // Si hay paginación server-side, notificar al componente padre
+    if (serverSidePagination && onPaginationChange) {
+      onPaginationChange(newPagination);
+    }
+  };
+
   const table = useReactTable<TData>({
     data: filteredData,
     columns,
@@ -174,13 +190,16 @@ const TankTable = <TData extends object>({
       onRowDelete: (row) => requestDelete(row, deleteConfirm, onRowDelete, setRowPendingDelete, setOpenDelete), 
       ...(tableMeta ?? {}) 
     },
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePaginationChange,
     onSortingChange: setSorting,
     onRowSelectionChange: enableRowSelection ? setRowSelection : undefined,
     onGlobalFilterChange: enableRowSelection ? setGlobalFilter : undefined,
     onColumnVisibilityChange: columnVisibility?.enabled ? setColumnVisibilityState : undefined,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    // Usar paginación server-side si está habilitada
+    manualPagination: serverSidePagination,
+    pageCount: serverSidePagination && pageCount !== undefined ? pageCount : undefined,
+    getPaginationRowModel: serverSidePagination ? undefined : getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     enableRowSelection: enableRowSelection,
@@ -258,7 +277,6 @@ const TankTable = <TData extends object>({
   if (error) {
     return (
       <InlineEditProvider>
-        <Toaster richColors position="top-right" />
         <ErrorState error={error} />
       </InlineEditProvider>
     );
@@ -268,7 +286,6 @@ const TankTable = <TData extends object>({
   if (isLoading) {
     return (
       <InlineEditProvider>
-        <Toaster richColors position="top-right" />
         <LoadingSkeleton rows={loadingRows} columns={columns.length} />
       </InlineEditProvider>
     );
@@ -278,7 +295,6 @@ const TankTable = <TData extends object>({
   if (!isLoading && data.length === 0) {
     return (
       <InlineEditProvider>
-        <Toaster richColors position="top-right" />
         {loadingStates?.emptyState || <EmptyState />}
       </InlineEditProvider>
     );
@@ -286,7 +302,6 @@ const TankTable = <TData extends object>({
 
   return (
     <InlineEditProvider>
-      <Toaster richColors position="top-right" />
       <div tabIndex={-1}>
       
       {/* Bulk Actions Bar */}
