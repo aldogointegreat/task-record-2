@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { ActividadNivel, Atributo, CreateActividadNivelDTO, UpdateActividadNivelDTO } from '@/models';
-import { createActividadNivel, updateActividadNivel, deleteActividadNivel } from '@/lib/api';
+import type { ActividadNivel, Atributo, CreateActividadNivelDTO, UpdateActividadNivelDTO, AtributoValor } from '@/models';
+import { createActividadNivel, updateActividadNivel, deleteActividadNivel, getAllAtributoValores } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,7 @@ export function NivelActividadesManager({
   onActividadesChange 
 }: NivelActividadesManagerProps) {
   const [localActividades, setLocalActividades] = useState<ActividadNivel[]>(actividades);
+  const [atributoValores, setAtributoValores] = useState<AtributoValor[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingActividad, setEditingActividad] = useState<ActividadNivel | null>(null);
@@ -34,6 +35,38 @@ export function NivelActividadesManager({
   // Actualizar estado local cuando cambien las actividades del padre
   useEffect(() => {
     setLocalActividades(actividades);
+  }, [actividades]);
+
+  // Cargar valores de atributos
+  useEffect(() => {
+    const loadAtributoValores = async () => {
+      const actividadesConAtributo = actividades.filter(a => a.IDT);
+      if (actividadesConAtributo.length === 0) {
+        setAtributoValores([]);
+        return;
+      }
+
+      try {
+        const promises = actividadesConAtributo.map(a => 
+          getAllAtributoValores({ IDA: a.IDA })
+        );
+        
+        const results = await Promise.all(promises);
+        const nuevosValores: AtributoValor[] = [];
+        
+        results.forEach(result => {
+          if (result.success && result.data) {
+            nuevosValores.push(...result.data);
+          }
+        });
+        
+        setAtributoValores(nuevosValores);
+      } catch (error) {
+        console.error('Error loading atributo valores:', error);
+      }
+    };
+
+    loadAtributoValores();
   }, [actividades]);
   
   const [formData, setFormData] = useState({
@@ -189,6 +222,10 @@ export function NivelActividadesManager({
                 {actividad.IDT && (
                   <div className="text-xs text-muted-foreground mt-1">
                     Atributo: {atributos.find(a => a.IDT === actividad.IDT)?.DESCRIPCION || `ID: ${actividad.IDT}`}
+                    {(() => {
+                      const valor = atributoValores.find(av => av.IDA === actividad.IDA);
+                      return valor ? <span className="ml-1 font-medium text-foreground">({valor.VALOR})</span> : null;
+                    })()}
                   </div>
                 )}
               </div>

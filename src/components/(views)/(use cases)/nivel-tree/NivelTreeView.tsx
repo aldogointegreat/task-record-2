@@ -9,10 +9,9 @@ import type { Jerarquia, Nivel, ActividadNivel, Atributo } from '@/models';
 import { buildNivelTree } from '@/lib/utils/build-nivel-tree';
 import { NivelDetailsPanel } from './NivelDetailsPanel';
 import { ActividadNivelDetailsPanel } from './ActividadNivelDetailsPanel';
-import { Info, Loader2 } from 'lucide-react';
+import { Info, Loader2, List, ListX, Layers } from 'lucide-react';
 import { toast } from 'sonner';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 export function NivelTreeView() {
   const [jerarquias, setJerarquias] = useState<Jerarquia[]>([]);
@@ -229,12 +228,12 @@ export function NivelTreeView() {
     ? (selectedItem.metadata.data as ActividadNivel)
     : null;
 
-  const handleToggleActividades = (checked: boolean) => {
-    setShowActividades(checked);
+  const handleToggleActividades = () => {
+    setShowActividades(prev => !prev);
   };
 
-  const handleToggleJerarquia = (checked: boolean) => {
-    setShowJerarquia(checked);
+  const handleToggleJerarquia = () => {
+    setShowJerarquia(prev => !prev);
   };
 
   const renderTreeContent = (isResizable = false) => (
@@ -247,32 +246,43 @@ export function NivelTreeView() {
                   Estructura jerárquica del sistema
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="show-actividades"
-                    checked={showActividades}
-                    onCheckedChange={(checked) => handleToggleActividades(checked === true)}
-                  />
-                  <Label 
-                    htmlFor="show-actividades" 
-                    className="text-xs text-muted-foreground cursor-pointer"
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={handleToggleActividades}
+                    title={showActividades ? 'Ocultar actividades' : 'Mostrar actividades'}
                   >
-                    Mostrar actividades
-                  </Label>
+                    {showActividades ? (
+                      <List className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ListX className="h-4 w-4 text-muted-foreground opacity-50" />
+                    )}
+                  </Button>
+                  <span className="text-[10px] text-muted-foreground leading-none">Actividades</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="show-jerarquia"
-                    checked={showJerarquia}
-                    onCheckedChange={(checked) => handleToggleJerarquia(checked === true)}
-                  />
-                  <Label 
-                    htmlFor="show-jerarquia" 
-                    className="text-xs text-muted-foreground cursor-pointer"
+                <div className="flex flex-col items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={handleToggleJerarquia}
+                    title={showJerarquia ? 'Ocultar jerarquía' : 'Mostrar jerarquía'}
                   >
-                    Mostrar jerarquía
-                  </Label>
+                    {showJerarquia ? (
+                      <Layers className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <div className="relative">
+                        <Layers className="h-4 w-4 text-muted-foreground opacity-40" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="h-[1.5px] w-5 bg-muted-foreground opacity-60 rotate-45" />
+                        </div>
+                      </div>
+                    )}
+                  </Button>
+                  <span className="text-[10px] text-muted-foreground leading-none">Jerarquía</span>
                 </div>
               </div>
             </div>
@@ -304,16 +314,7 @@ export function NivelTreeView() {
 
   const renderDetailContent = (isResizable = false) => (
     <Card className={isResizable ? "h-full border-0 shadow-none rounded-none" : ""}>
-          <CardHeader>
-            <CardTitle>Información</CardTitle>
-            <CardDescription>
-              {selectedNivel
-                ? 'Detalles del nivel seleccionado'
-                : selectedActividad
-                ? 'Detalles de la actividad seleccionada'
-                : 'Selecciona un nivel o actividad del árbol para ver su información'}
-            </CardDescription>
-          </CardHeader>
+         
           <CardContent>
             {selectedNivel ? (
               <NivelDetailsPanel 
