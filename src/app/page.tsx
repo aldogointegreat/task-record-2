@@ -1,9 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Activity, ArrowRight, Settings, Users, FolderTree, BookOpen, Shield, Layers, Tag, Package, Network } from 'lucide-react';
+import { ArrowRight, Users, BookOpen, Shield, Layers, Tag, Package, Network, ListChecks, FolderTree } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -13,28 +12,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <Activity className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <h1 className="text-xl font-bold">Task Record</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="flex flex-col min-h-full">
       {/* Main Content */}
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-7xl mx-auto">
           {/* Welcome Section */}
           <div className="text-center mb-12">
@@ -141,6 +121,14 @@ export default function Home() {
                   color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
                   hoverColor: 'hover:bg-amber-500/20',
                 },
+                {
+                  title: 'Actividades de Nivel',
+                  description: 'Gestión de actividades asociadas a niveles',
+                  icon: ListChecks,
+                  href: '/actividad-nivel',
+                  color: 'bg-pink-500/10 text-pink-500 border-pink-500/20',
+                  hoverColor: 'hover:bg-pink-500/20',
+                },
               ].map((item) => {
                 const Icon = item.icon;
                 return (
@@ -177,7 +165,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card
                 className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20"
-                onClick={() => handleNavigation('/tree-view')}
+                onClick={() => handleNavigation('/niveles')}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
@@ -190,23 +178,14 @@ export default function Home() {
                 </CardHeader>
                 <CardContent className="pt-0">
                   <CardDescription className="text-sm">
-                    Componente de árbol jerárquico con ejemplos de uso
+                    Vista jerárquica de niveles con gestión de actividades
                   </CardDescription>
                 </CardContent>
               </Card>
             </div>
           </div>
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border py-6 mt-auto">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-sm text-muted-foreground">
-            <p>Task Record © {new Date().getFullYear()} - Sistema de gestión</p>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }

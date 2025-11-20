@@ -87,11 +87,33 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
         }, [draggedItem, onDocumentDrag])
 
         const expandedItemIds = React.useMemo(() => {
+            const ids: string[] = []
+
+            // Si expandAll es true, expandir todos los nodos
+            if (expandAll) {
+                function getAllIds(items: TreeDataItem[] | TreeDataItem) {
+                    if (items instanceof Array) {
+                        items.forEach(item => {
+                            ids.push(item.id)
+                            if (item.children) {
+                                getAllIds(item.children)
+                            }
+                        })
+                    } else {
+                        ids.push(items.id)
+                        if (items.children) {
+                            getAllIds(items.children)
+                        }
+                    }
+                }
+                getAllIds(data)
+                return ids
+            }
+
+            // Lógica original para cuando expandAll es false
             if (!initialSelectedItemId) {
                 return [] as string[]
             }
-
-            const ids: string[] = []
 
             function walkTreeItems(
                 items: TreeDataItem[] | TreeDataItem,
@@ -100,12 +122,12 @@ const TreeView = React.forwardRef<HTMLDivElement, TreeProps>(
                 if (items instanceof Array) {
                     for (let i = 0; i < items.length; i++) {
                         ids.push(items[i]!.id)
-                        if (walkTreeItems(items[i]!, targetId) && !expandAll) {
+                        if (walkTreeItems(items[i]!, targetId)) {
                             return true
                         }
-                        if (!expandAll) ids.pop()
+                        ids.pop()
                     }
-                } else if (!expandAll && items.id === targetId) {
+                } else if (items.id === targetId) {
                     return true
                 } else if (items.children) {
                     return walkTreeItems(items.children, targetId)

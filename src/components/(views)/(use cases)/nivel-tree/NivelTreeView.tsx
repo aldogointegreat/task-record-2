@@ -11,6 +11,8 @@ import { NivelDetailsPanel } from './NivelDetailsPanel';
 import { ActividadNivelDetailsPanel } from './ActividadNivelDetailsPanel';
 import { Info, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 export function NivelTreeView() {
   const [jerarquias, setJerarquias] = useState<Jerarquia[]>([]);
@@ -20,10 +22,27 @@ export function NivelTreeView() {
   const [treeData, setTreeData] = useState<TreeDataItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<TreeDataItem | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [showActividades, setShowActividades] = useState(true);
+  const [showJerarquia, setShowJerarquia] = useState(true);
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Reconstruir árbol cuando cambie showActividades o showJerarquia (solo si ya tenemos datos)
+  useEffect(() => {
+    if (!loading && jerarquias.length > 0 && niveles.length > 0) {
+      const tree = buildNivelTree(
+        jerarquias,
+        niveles,
+        actividadesNivel.length > 0 ? actividadesNivel : undefined,
+        showActividades,
+        showJerarquia
+      );
+      setTreeData(tree);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showActividades, showJerarquia]);
 
   const loadData = async () => {
     setLoading(true);
@@ -61,7 +80,9 @@ export function NivelTreeView() {
         const tree = buildNivelTree(
           jerarquiasResult.data, 
           nivelesResult.data,
-          actividadesResult.success && actividadesResult.data ? actividadesResult.data : undefined
+          actividadesResult.success && actividadesResult.data ? actividadesResult.data : undefined,
+          showActividades,
+          showJerarquia
         );
         setTreeData(tree);
       }
@@ -70,6 +91,124 @@ export function NivelTreeView() {
       toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleActividadesChange = async () => {
+    // Recargar solo las actividades en segundo plano sin refrescar el árbol
+    try {
+      const actividadesResult = await getAllActividadNiveles();
+      if (actividadesResult.success && actividadesResult.data) {
+        setActividadesNivel(actividadesResult.data);
+        
+        // Reconstruir el árbol con los nuevos datos pero sin cambiar el estado de loading
+        if (jerarquias.length > 0 && niveles.length > 0) {
+          const tree = buildNivelTree(
+            jerarquias, 
+            niveles,
+            actividadesResult.data,
+            showActividades,
+            showJerarquia
+          );
+          setTreeData(tree);
+          
+          // Si hay un item seleccionado, actualizarlo con el nuevo árbol
+          if (selectedItem?.metadata && typeof selectedItem.metadata === 'object' && 'entity' in selectedItem.metadata) {
+            const metadata = selectedItem.metadata;
+            
+            // Actualizar nivel seleccionado
+            if (metadata.entity === 'nivel' && 'data' in metadata) {
+              const currentNivelId = (metadata.data as Nivel).IDN;
+              const findUpdatedItem = (items: TreeDataItem[]): TreeDataItem | null => {
+                for (const item of items) {
+                  if (item.id === `nivel-${currentNivelId}`) return item;
+                  if (item.children) {
+                    const found = findUpdatedItem(item.children);
+                    if (found) return found;
+                  }
+                }
+                return null;
+              };
+              const updatedItem = findUpdatedItem(tree);
+              if (updatedItem) setSelectedItem(updatedItem);
+            }
+            
+            // Actualizar actividad seleccionada
+            if (metadata.entity === 'actividad-nivel' && 'data' in metadata) {
+              const currentActividadId = (metadata.data as ActividadNivel).IDA;
+              const findUpdatedItem = (items: TreeDataItem[]): TreeDataItem | null => {
+                for (const item of items) {
+                  if (item.id === `actividad-${currentActividadId}`) return item;
+                  if (item.children) {
+                    const found = findUpdatedItem(item.children);
+                    if (found) return found;
+                  }
+                }
+                return null;
+              };
+              const updatedItem = findUpdatedItem(tree);
+              if (updatedItem) setSelectedItem(updatedItem);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error updating actividades:', error);
+    }
+  };
+
+  const handleNivelesChange = async () => {
+    // Recargar los niveles en segundo plano sin refrescar completamente
+    try {
+      const nivelesResult = await getAllNiveles();
+      if (nivelesResult.success && nivelesResult.data) {
+        setNiveles(nivelesResult.data);
+        
+        // Reconstruir el árbol con los nuevos datos
+        if (jerarquias.length > 0) {
+          const tree = buildNivelTree(
+            jerarquias,
+            nivelesResult.data,
+            actividadesNivel.length > 0 ? actividadesNivel : undefined,
+            showActividades,
+            showJerarquia
+          );
+          setTreeData(tree);
+          
+          // Si hay un nivel seleccionado, actualizarlo con los datos frescos
+          if (selectedItem?.metadata && 
+              typeof selectedItem.metadata === 'object' && 
+              'entity' in selectedItem.metadata && 
+              selectedItem.metadata.entity === 'nivel' &&
+              'data' in selectedItem.metadata) {
+            const currentNivelId = (selectedItem.metadata.data as Nivel).IDN;
+            const updatedNivel = nivelesResult.data.find(n => n.IDN === currentNivelId);
+            
+            if (updatedNivel) {
+              // Encontrar el item actualizado en el nuevo árbol
+              const findUpdatedItem = (items: TreeDataItem[]): TreeDataItem | null => {
+                for (const item of items) {
+                  if (item.id === `nivel-${currentNivelId}`) {
+                    return item;
+                  }
+                  if (item.children) {
+                    const found = findUpdatedItem(item.children);
+                    if (found) return found;
+                  }
+                }
+                return null;
+              };
+              
+              const updatedItem = findUpdatedItem(tree);
+              if (updatedItem) {
+                setSelectedItem(updatedItem);
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error updating niveles:', error);
     }
   };
 
@@ -90,13 +229,53 @@ export function NivelTreeView() {
     ? (selectedItem.metadata.data as ActividadNivel)
     : null;
 
+  const handleToggleActividades = (checked: boolean) => {
+    setShowActividades(checked);
+  };
+
+  const handleToggleJerarquia = (checked: boolean) => {
+    setShowJerarquia(checked);
+  };
+
   const renderTreeContent = (isResizable = false) => (
-    <Card className={isResizable ? "h-full border-0 shadow-none rounded-none" : ""}>
+    <Card className={isResizable ? "h-full border-0 shadow-none rounded-none gap-1" : ""}>
           <CardHeader>
-            <CardTitle className="text-lg">Jerarquía de Niveles</CardTitle>
-            <CardDescription className="text-xs">
-              Estructura jerárquica del sistema
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg">Jerarquía de Niveles</CardTitle>
+                <CardDescription className="text-xs">
+                  Estructura jerárquica del sistema
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="show-actividades"
+                    checked={showActividades}
+                    onCheckedChange={(checked) => handleToggleActividades(checked === true)}
+                  />
+                  <Label 
+                    htmlFor="show-actividades" 
+                    className="text-xs text-muted-foreground cursor-pointer"
+                  >
+                    Mostrar actividades
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="show-jerarquia"
+                    checked={showJerarquia}
+                    onCheckedChange={(checked) => handleToggleJerarquia(checked === true)}
+                  />
+                  <Label 
+                    htmlFor="show-jerarquia" 
+                    className="text-xs text-muted-foreground cursor-pointer"
+                  >
+                    Mostrar jerarquía
+                  </Label>
+                </div>
+              </div>
+            </div>
           </CardHeader>
       <CardContent className="p-0 h-[calc(100%-80px)]">
         <div className={`overflow-x-auto overflow-y-auto p-4 ${isResizable ? "h-full" : "max-h-[calc(100vh-200px)] min-w-[300px]"}`}>
@@ -115,7 +294,7 @@ export function NivelTreeView() {
                 <TreeView
                   data={treeData}
                   onSelectChange={(item) => setSelectedItem(item)}
-                  expandAll={false}
+                  expandAll={true}
                 />
               )}
             </div>
@@ -141,6 +320,10 @@ export function NivelTreeView() {
                 nivel={selectedNivel} 
                 jerarquias={jerarquias}
                 niveles={niveles}
+                actividadesNivel={actividadesNivel}
+                atributos={atributos}
+                onActividadesChange={handleActividadesChange}
+                onNivelesChange={handleNivelesChange}
               />
             ) : selectedActividad ? (
               <ActividadNivelDetailsPanel 

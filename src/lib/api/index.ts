@@ -11,4 +11,5 @@ export * from './entrega-api';
 export * from './usuario-api';
 export * from './nivel-api';
 export * from './actividad-nivel-api';
+export * from './atributo-valor-api';
 

@@ -1,26 +1,42 @@
-import type { Nivel, Jerarquia } from '@/models';
-import { Info, FolderTree, Folder, FileText, Hash, CheckSquare, Package } from 'lucide-react';
+import type { Nivel, Jerarquia, ActividadNivel, Atributo } from '@/models';
+import { Info, FolderTree, Folder, FileText, Hash, CheckSquare, Package, MessageSquare, Circle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { NivelActividadesManager } from './NivelActividadesManager';
+import { NivelChildrenManager } from './NivelChildrenManager';
+import { getIconComponent } from '@/lib/constants/app-icons';
 
 interface NivelDetailsPanelProps {
   nivel: Nivel;
   jerarquias: Jerarquia[];
   niveles: Nivel[];
+  actividadesNivel?: ActividadNivel[];
+  atributos?: Atributo[];
+  onActividadesChange?: () => void;
+  onNivelesChange?: () => void;
 }
 
-export function NivelDetailsPanel({ nivel, jerarquias, niveles }: NivelDetailsPanelProps) {
+export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel = [], atributos = [], onActividadesChange, onNivelesChange }: NivelDetailsPanelProps) {
   // Buscar la jerarquía correspondiente
   const jerarquia = jerarquias.find(j => j.IDJ === nivel.IDJ);
   
   // Buscar el nivel padre si existe
   const nivelPadre = nivel.IDNP ? niveles.find(n => n.IDN === nivel.IDNP) : null;
 
+  // Obtener el icono del nivel (misma lógica que en build-nivel-tree)
+  const hasNivelChildren = niveles.some(n => n.IDNP === nivel.IDN);
+  const hasActividades = actividadesNivel.some(a => a.IDN === nivel.IDN);
+  const hasAnyChildren = hasNivelChildren || hasActividades;
+  
+  const CustomIcon = nivel.ICONO ? getIconComponent(nivel.ICONO) : null;
+  const DefaultIcon = hasAnyChildren ? Folder : Circle;
+  const IconComponent = CustomIcon || DefaultIcon;
+
   return (
     <div className="space-y-4">
       {/* Header con icono y nombre */}
       <div className="flex items-start gap-3 pb-4 border-b border-border">
         <div className="p-2 rounded-lg bg-primary/10">
-          <FileText className="h-5 w-5 text-primary" />
+          <IconComponent className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1">
           <h3 className="font-semibold text-lg">{nivel.NOMBRE}</h3>
@@ -103,6 +119,21 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles }: NivelDetailsPa
           </p>
         </div>
 
+        {/* Comentario */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Comentario</span>
+          </div>
+          <p className="text-sm text-muted-foreground pl-6">
+            {nivel.COMENTARIO ? (
+              <span className="text-foreground">{nivel.COMENTARIO}</span>
+            ) : (
+              <span className="italic">Sin comentario</span>
+            )}
+          </p>
+        </div>
+
         {/* Información de hijos */}
         {(() => {
           const hijosCount = niveles.filter(n => n.IDNP === nivel.IDN).length;
@@ -121,6 +152,26 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles }: NivelDetailsPa
           }
           return null;
         })()}
+      </div>
+
+      {/* Gestor de Niveles Hijos */}
+      <div className="mt-6 pt-6 border-t border-border">
+        <NivelChildrenManager
+          nivelPadreId={nivel.IDN}
+          niveles={niveles.filter(n => n.IDNP === nivel.IDN)}
+          jerarquias={jerarquias}
+          onNivelesChange={onNivelesChange || (() => {})}
+        />
+      </div>
+
+      {/* Gestor de Actividades */}
+      <div className="mt-6 pt-6 border-t border-border">
+        <NivelActividadesManager
+          nivelId={nivel.IDN}
+          actividades={actividadesNivel.filter(a => a.IDN === nivel.IDN)}
+          atributos={atributos}
+          onActividadesChange={onActividadesChange || (() => {})}
+        />
       </div>
     </div>
   );

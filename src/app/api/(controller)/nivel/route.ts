@@ -132,6 +132,30 @@ export async function POST(request: NextRequest) {
       params.ICONO = body.ICONO;
     }
 
+    if (body.GENERADO !== undefined) {
+      fields.push('GENERADO');
+      values.push('@GENERADO');
+      params.GENERADO = body.GENERADO ? 1 : 0;
+    }
+
+    if (body.COMENTARIO !== undefined) {
+      fields.push('COMENTARIO');
+      values.push('@COMENTARIO');
+      params.COMENTARIO = body.COMENTARIO || null;
+    }
+
+    if (body.ID_USR !== undefined) {
+      fields.push('ID_USR');
+      values.push('@ID_USR');
+      params.ID_USR = body.ID_USR || null;
+    }
+
+    if (body.FECHA_CREACION !== undefined) {
+      fields.push('FECHA_CREACION');
+      values.push('@FECHA_CREACION');
+      params.FECHA_CREACION = body.FECHA_CREACION || null;
+    }
+
     const sqlQuery = `
       INSERT INTO [NIVEL] (${fields.join(', ')})
       OUTPUT INSERTED.*

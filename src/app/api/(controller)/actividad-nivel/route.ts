@@ -11,18 +11,18 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const filters: ActividadNivelFilters = {};
 
+    // Construir filtros desde query params
     if (searchParams.has('IDN')) {
-      const idn = searchParams.get('IDN');
-      if (idn) filters.IDN = parseInt(idn);
+      filters.IDN = parseInt(searchParams.get('IDN') || '0');
     }
     if (searchParams.has('IDT')) {
-      const idt = searchParams.get('IDT');
-      if (idt) filters.IDT = parseInt(idt);
+      filters.IDT = parseInt(searchParams.get('IDT') || '0');
     }
     if (searchParams.has('DESCRIPCION')) {
       filters.DESCRIPCION = searchParams.get('DESCRIPCION') || undefined;
     }
 
+    // Construir condiciones WHERE
     let whereClause = 'WHERE 1=1';
     const params: Record<string, unknown> = {};
 
@@ -30,15 +30,18 @@ export async function GET(request: NextRequest) {
       whereClause += ' AND IDN = @IDN';
       params.IDN = filters.IDN;
     }
+
     if (filters.IDT !== undefined) {
       whereClause += ' AND IDT = @IDT';
       params.IDT = filters.IDT;
     }
+
     if (filters.DESCRIPCION) {
       whereClause += ' AND DESCRIPCION LIKE @DESCRIPCION';
       params.DESCRIPCION = `%${filters.DESCRIPCION}%`;
     }
 
+    // Ejecutar query
     const result = await query<ActividadNivel>(
       `SELECT * FROM [ACTIVIDAD_NIVEL] ${whereClause} ORDER BY IDN ASC, ORDEN ASC`,
       params
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: result,
-      message: `Se encontraron ${result.length} actividades`,
+      message: `Se encontraron ${result.length} actividades de nivel`,
     }, { status: 200 });
 
   } catch (error) {
@@ -55,9 +58,92 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: false,
       data: null,
-      message: error instanceof Error ? error.message : 'Error al obtener actividades',
+      message: error instanceof Error ? error.message : 'Error al obtener actividades de nivel',
     }, { status: 500 });
   }
 }
 
+/**
+ * POST /api/actividad-nivel
+ * Crea una nueva actividad de nivel
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body: CreateActividadNivelDTO = await request.json();
 
+    // Validar campos requeridos
+    if (!body.IDN) {
+      return NextResponse.json({
+        success: false,
+        data: null,
+        message: 'El campo IDN es requerido',
+      }, { status: 400 });
+    }
+
+    if (!body.ORDEN) {
+      return NextResponse.json({
+        success: false,
+        data: null,
+        message: 'El campo ORDEN es requerido',
+      }, { status: 400 });
+    }
+
+    if (!body.DESCRIPCION) {
+      return NextResponse.json({
+        success: false,
+        data: null,
+        message: 'El campo DESCRIPCION es requerido',
+      }, { status: 400 });
+    }
+
+    // Construir query dinámica
+    const fields: string[] = [];
+    const values: string[] = [];
+    const params: Record<string, unknown> = {};
+
+    if (body.IDN !== undefined) {
+      fields.push('IDN');
+      values.push('@IDN');
+      params.IDN = body.IDN;
+    }
+
+    if (body.IDT !== undefined) {
+      fields.push('IDT');
+      values.push('@IDT');
+      params.IDT = body.IDT;
+    }
+
+    if (body.ORDEN !== undefined) {
+      fields.push('ORDEN');
+      values.push('@ORDEN');
+      params.ORDEN = body.ORDEN;
+    }
+
+    if (body.DESCRIPCION !== undefined) {
+      fields.push('DESCRIPCION');
+      values.push('@DESCRIPCION');
+      params.DESCRIPCION = body.DESCRIPCION;
+    }
+
+    const sqlQuery = `
+      INSERT INTO [ACTIVIDAD_NIVEL] (${fields.join(', ')})
+      OUTPUT INSERTED.*
+      VALUES (${values.join(', ')})`;
+
+    const result = await query<ActividadNivel>(sqlQuery, params);
+
+    return NextResponse.json({
+      success: true,
+      data: result[0],
+      message: 'Actividad de nivel creada exitosamente',
+    }, { status: 201 });
+
+  } catch (error) {
+    console.error('Error en POST /api/actividad-nivel:', error);
+    return NextResponse.json({
+      success: false,
+      data: null,
+      message: error instanceof Error ? error.message : 'Error al crear actividad de nivel',
+    }, { status: 500 });
+  }
+}

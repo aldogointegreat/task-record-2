@@ -3,7 +3,7 @@
 import React from 'react';
 import type { TreeDataItem } from '@/components/tree-view';
 import type { Jerarquia, Nivel, ActividadNivel } from '@/models';
-import { Folder, FileText, ListChecks } from 'lucide-react';
+import { Folder, Circle, ListChecks } from 'lucide-react';
 import { getIconComponent } from '@/lib/constants/app-icons';
 
 /**
@@ -20,7 +20,9 @@ import { getIconComponent } from '@/lib/constants/app-icons';
 export function buildNivelTree(
   jerarquias: Jerarquia[],
   niveles: Nivel[],
-  actividadesNivel?: ActividadNivel[]
+  actividadesNivel?: ActividadNivel[],
+  showActividades: boolean = true,
+  showJerarquia: boolean = true
 ): TreeDataItem[] {
   // Helper para construir actividades de nivel
   const buildActividadesNivel = (nivelId: number): TreeDataItem[] => {
@@ -55,6 +57,7 @@ export function buildNivelTree(
 
   // Helper para construir niveles recursivamente basándose en la relación padre-hijo
   const buildNivelChildren = (parentId: number): TreeDataItem[] => {
+    // Esta función usa showActividades del scope externo
     // Buscar todos los niveles cuyo padre (IDNP) es el parentId
     const children = niveles.filter(n => n.IDNP === parentId);
     
@@ -81,21 +84,22 @@ export function buildNivelTree(
         allChildren.push(...buildNivelChildren(nivel.IDN));
       }
       
-      // Luego agregar actividades de nivel
-      if (actividades.length > 0) {
+      // Luego agregar actividades de nivel (solo si showActividades es true)
+      if (showActividades && actividades.length > 0) {
         allChildren.push(...actividades);
       }
       
       // Obtener el ícono del nivel o usar el ícono por defecto
       const CustomIcon = nivel.ICONO ? getIconComponent(nivel.ICONO) : null;
-      const defaultIcon = hasNivelChildren || actividades.length > 0 ? Folder : FileText;
+      const hasAnyChildren = hasNivelChildren || (showActividades && actividades.length > 0);
+      const defaultIcon = hasAnyChildren ? Folder : Circle;
       
       return {
         id: `nivel-${nivel.IDN}`,
         name: (
           <span className="flex items-center gap-2 w-full">
             <span className="flex-1 truncate">{nivel.NOMBRE}</span>
-            {jerarquiaNombre && (
+            {showJerarquia && jerarquiaNombre && (
               <span 
                 className="text-xs font-normal shrink-0 flex items-center gap-1.5 px-1.5 py-0.5 rounded-full bg-muted/50"
                 style={jerarquiaColor ? { 
@@ -157,21 +161,22 @@ export function buildNivelTree(
       allChildren.push(...buildNivelChildren(nivel.IDN));
     }
     
-    // Luego agregar actividades de nivel
-    if (actividades.length > 0) {
+    // Luego agregar actividades de nivel (solo si showActividades es true)
+    if (showActividades && actividades.length > 0) {
       allChildren.push(...actividades);
     }
     
     // Obtener el ícono del nivel o usar el ícono por defecto
     const CustomIcon = nivel.ICONO ? getIconComponent(nivel.ICONO) : null;
-    const defaultIcon = allChildren.length > 0 ? Folder : FileText;
+    const hasAnyChildren = hasNivelChildren || (showActividades && actividades.length > 0);
+    const defaultIcon = hasAnyChildren ? Folder : Circle;
     
     return {
       id: `nivel-${nivel.IDN}`,
       name: (
         <span className="flex items-center gap-2 w-full">
           <span className="flex-1 truncate">{nivel.NOMBRE}</span>
-          {jerarquiaNombre && (
+          {showJerarquia && jerarquiaNombre && (
             <span 
               className="text-xs font-normal shrink-0 flex items-center gap-1.5 px-1.5 py-0.5 rounded-full bg-muted/50"
               style={jerarquiaColor ? { 

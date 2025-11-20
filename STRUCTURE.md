@@ -441,6 +441,12 @@ Para agregar una nueva entidad (ej: `Tarea`):
 5. **View**: Crear `src/components/(views)/(tables)/tarea/TareaList.tsx` (usando TankTable)
 6. **Page**: Crear `src/app/tarea/page.tsx`
 7. **Exportar**: Actualizar `index.ts` en cada carpeta
+8. **Homepage**: ⚠️ **OBLIGATORIO** - Agregar acceso rápido en `src/app/page.tsx` en la sección "Tablas Maestras" con:
+   - Título descriptivo
+   - Descripción breve
+   - Ícono apropiado (de lucide-react)
+   - Color único (ej: `bg-[color]-500/10 text-[color]-500 border-[color]-500/20`)
+   - Ruta correcta (`/tarea`)
 
 ### Agregar Nuevo Caso de Uso
 

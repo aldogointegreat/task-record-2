@@ -11,4 +11,5 @@ export * from './entrega.model';
 export * from './usuario.model';
 export * from './nivel.model';
 export * from './actividad-nivel.model';
+export * from './atributo-valor.model';
 

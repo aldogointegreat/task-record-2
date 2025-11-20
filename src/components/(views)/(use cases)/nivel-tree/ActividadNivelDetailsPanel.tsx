@@ -1,5 +1,7 @@
-import type { ActividadNivel, Atributo } from '@/models';
-import { Info, ListChecks, Hash, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import type { ActividadNivel, Atributo, AtributoValor } from '@/models';
+import { Info, ListChecks, Hash, FileText, Tag } from 'lucide-react';
+import { getAllAtributoValores } from '@/lib/api';
 
 interface ActividadNivelDetailsPanelProps {
   actividad: ActividadNivel;
@@ -7,7 +9,28 @@ interface ActividadNivelDetailsPanelProps {
 }
 
 export function ActividadNivelDetailsPanel({ actividad, atributos }: ActividadNivelDetailsPanelProps) {
+  const [valores, setValores] = useState<AtributoValor[]>([]);
+  const [loadingValores, setLoadingValores] = useState(false);
+  
   const atributo = actividad.IDT ? atributos?.find(a => a.IDT === actividad.IDT) : null;
+
+  useEffect(() => {
+    const loadValores = async () => {
+      setLoadingValores(true);
+      try {
+        const result = await getAllAtributoValores({ IDA: actividad.IDA });
+        if (result.success && result.data) {
+          setValores(result.data);
+        }
+      } catch (error) {
+        console.error('Error loading valores:', error);
+      } finally {
+        setLoadingValores(false);
+      }
+    };
+
+    loadValores();
+  }, [actividad.IDA]);
 
   return (
     <div className="space-y-4">
@@ -73,6 +96,31 @@ export function ActividadNivelDetailsPanel({ actividad, atributos }: ActividadNi
             )}
           </p>
         </div>
+
+        {/* Valores de Atributo */}
+        {valores.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Tag className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Valores</span>
+            </div>
+            <div className="pl-6 space-y-1">
+              {valores.map((valor) => (
+                <div key={valor.IDAV} className="flex items-center gap-2">
+                  <span className="text-xs px-2 py-1 rounded bg-muted text-foreground">
+                    {valor.VALOR}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {loadingValores && (
+          <div className="text-sm text-muted-foreground pl-6">
+            Cargando valores...
+          </div>
+        )}
       </div>
     </div>
   );

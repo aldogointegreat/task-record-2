@@ -103,6 +103,21 @@ export async function PUT(
       queryParams.ICONO = body.ICONO;
     }
 
+    if (body.GENERADO !== undefined) {
+      updates.push('GENERADO = @GENERADO');
+      queryParams.GENERADO = body.GENERADO ? 1 : 0;
+    }
+
+    if (body.COMENTARIO !== undefined) {
+      updates.push('COMENTARIO = @COMENTARIO');
+      queryParams.COMENTARIO = body.COMENTARIO || null;
+    }
+
+    if (body.ID_USR !== undefined) {
+      updates.push('ID_USR = @ID_USR');
+      queryParams.ID_USR = body.ID_USR || null;
+    }
+
     if (updates.length === 0) {
       return NextResponse.json({
         success: false,
