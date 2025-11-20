@@ -44,8 +44,8 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
         </div>
       </div>
 
-      {/* Información básica */}
-      <div className="space-y-3">
+      {/* Información básica - Layout de 2 columnas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Código */}
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -119,21 +119,6 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
           </p>
         </div>
 
-        {/* Comentario */}
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Comentario</span>
-          </div>
-          <p className="text-sm text-muted-foreground pl-6">
-            {nivel.COMENTARIO ? (
-              <span className="text-foreground">{nivel.COMENTARIO}</span>
-            ) : (
-              <span className="italic">Sin comentario</span>
-            )}
-          </p>
-        </div>
-
         {/* Información de hijos */}
         {(() => {
           const hijosCount = niveles.filter(n => n.IDNP === nivel.IDN).length;
@@ -152,6 +137,21 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
           }
           return null;
         })()}
+      </div>
+
+      {/* Comentario - Ocupa el ancho completo */}
+      <div className="pt-2">
+        <div className="flex items-center gap-2 mb-2">
+          <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium">Comentario</span>
+        </div>
+        <p className="text-sm text-muted-foreground pl-6">
+          {nivel.COMENTARIO ? (
+            <span className="text-foreground">{nivel.COMENTARIO}</span>
+          ) : (
+            <span className="italic">Sin comentario</span>
+          )}
+        </p>
       </div>
 
       {/* Gestor de Niveles Hijos */}

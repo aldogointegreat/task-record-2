@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,11 @@ export function NivelChildrenManager({
   onNivelesChange 
 }: NivelChildrenManagerProps) {
   const [localNiveles, setLocalNiveles] = useState<Nivel[]>(niveles);
+  
+  // Sincronizar localNiveles cuando el prop niveles cambie
+  useEffect(() => {
+    setLocalNiveles(niveles);
+  }, [niveles]);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);

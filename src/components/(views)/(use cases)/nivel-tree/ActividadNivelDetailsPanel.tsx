@@ -45,8 +45,8 @@ export function ActividadNivelDetailsPanel({ actividad, atributos }: ActividadNi
         </div>
       </div>
 
-      {/* Información básica */}
-      <div className="space-y-3">
+      {/* Información básica - Layout de 2 columnas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* ID */}
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -96,32 +96,32 @@ export function ActividadNivelDetailsPanel({ actividad, atributos }: ActividadNi
             )}
           </p>
         </div>
-
-        {/* Valores de Atributo */}
-        {valores.length > 0 && (
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Tag className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Valores</span>
-            </div>
-            <div className="pl-6 space-y-1">
-              {valores.map((valor) => (
-                <div key={valor.IDAV} className="flex items-center gap-2">
-                  <span className="text-xs px-2 py-1 rounded bg-muted text-foreground">
-                    {valor.VALOR}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {loadingValores && (
-          <div className="text-sm text-muted-foreground pl-6">
-            Cargando valores...
-          </div>
-        )}
       </div>
+
+      {/* Valores de Atributo - Ocupa el ancho completo */}
+      {valores.length > 0 && (
+        <div className="pt-2">
+          <div className="flex items-center gap-2 mb-2">
+            <Tag className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Valores</span>
+          </div>
+          <div className="pl-6 space-y-1">
+            {valores.map((valor) => (
+              <div key={valor.IDAV} className="flex items-center gap-2">
+                <span className="text-xs px-2 py-1 rounded bg-muted text-foreground">
+                  {valor.VALOR}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {loadingValores && (
+        <div className="text-sm text-muted-foreground pl-6 pt-2">
+          Cargando valores...
+        </div>
+      )}
     </div>
   );
 }
