@@ -1,5 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import type { Jerarquia } from "@/models";
+import { EditableCell, ActionsCell } from "@/lib/utils/tanktable-enhanted/component/actions-cell";
 
 export const jerarquiaColumns: ColumnDef<Jerarquia>[] = [
   {
@@ -13,10 +14,36 @@ export const jerarquiaColumns: ColumnDef<Jerarquia>[] = [
   {
     accessorKey: "DESCRIPCION",
     header: "Descripción",
-    cell: ({ getValue }) => {
-      const value = getValue<string>();
-      return <span className="font-medium">{value}</span>;
-    },
+    cell: ({ row }) => (
+      <EditableCell 
+        row={row} 
+        field="DESCRIPCION" 
+        inputType="text" 
+        className="font-medium"
+      />
+    ),
+  },
+  {
+    accessorKey: "COLOR",
+    header: "Color",
+    cell: ({ row }) => (
+      <EditableCell 
+        row={row} 
+        field="COLOR" 
+        inputType="color" 
+      />
+    ),
+  },
+  {
+    id: "actions",
+    header: "Acciones",
+    cell: ({ row, table }) => (
+      <ActionsCell 
+        row={row} 
+        onRowSave={table.options.meta?.onRowSave}
+        onRowDelete={table.options.meta?.onRowDelete}
+      />
+    ),
   },
 ];
 

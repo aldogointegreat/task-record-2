@@ -56,6 +56,11 @@ export function NivelList() {
         NOMBRE: data.NOMBRE,
         PLANTILLA: data.PLANTILLA ?? false,
         NROPM: data.NROPM ?? 0,
+        ICONO: data.ICONO,
+        GENERADO: data.GENERADO ?? false,
+        COMENTARIO: data.COMENTARIO,
+        ID_USR: data.ID_USR,
+        // FECHA_CREACION usually auto-generated
       };
 
       const result = await createNivel(createData);
@@ -86,6 +91,10 @@ export function NivelList() {
         NOMBRE: data.NOMBRE,
         PLANTILLA: data.PLANTILLA,
         NROPM: data.NROPM,
+        ICONO: data.ICONO,
+        GENERADO: data.GENERADO,
+        COMENTARIO: data.COMENTARIO,
+        ID_USR: data.ID_USR,
       };
 
       const result = await updateNivel(data.IDN, updateData);
@@ -204,10 +213,33 @@ export function NivelList() {
               inputType: 'checkbox',
             },
             {
+              name: 'GENERADO',
+              label: 'Generado',
+              inputType: 'checkbox',
+            },
+            {
               name: 'NROPM',
               label: 'Número de PM',
               inputType: 'number',
               placeholder: '0',
+            },
+            {
+              name: 'COMENTARIO',
+              label: 'Comentario',
+              inputType: 'textarea',
+              placeholder: 'Comentario opcional',
+            },
+            {
+              name: 'ID_USR',
+              label: 'ID Usuario',
+              inputType: 'number',
+              placeholder: 'ID de usuario',
+            },
+            {
+              name: 'ICONO',
+              label: 'Ícono',
+              inputType: 'icon',
+              placeholder: 'Seleccionar ícono...',
             },
           ],
           onSubmit: handleCreate,
@@ -226,5 +258,3 @@ export function NivelList() {
     </div>
   );
 }
-
-

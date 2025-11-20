@@ -10,7 +10,7 @@ declare module "@tanstack/react-table" {
   }
 }
 
-export type InputKind = "text" | "number" | "textarea" | "checkbox" | "select" | "date";
+export type InputKind = "text" | "number" | "textarea" | "checkbox" | "select" | "date" | "color" | "icon";
 
 export interface FormField<TData extends object> {
   name: keyof TData & string;

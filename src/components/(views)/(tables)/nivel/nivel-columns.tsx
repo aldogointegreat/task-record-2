@@ -2,6 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import type { Nivel, Jerarquia } from "@/models";
 import { ActionsCell, EditableCell } from "@/lib/utils/tanktable-enhanted/component/actions-cell";
 import { Loader2 } from "lucide-react";
+import { format } from "date-fns";
 
 interface NivelColumnsProps {
   jerarquias?: Jerarquia[];
@@ -101,6 +102,17 @@ export const createNivelColumns = (props?: NivelColumnsProps): ColumnDef<Nivel>[
       ),
     },
     {
+      accessorKey: "GENERADO",
+      header: "Generado",
+      cell: ({ row }) => (
+        <EditableCell<Nivel, "GENERADO">
+          row={row}
+          field="GENERADO"
+          inputType="checkbox"
+        />
+      ),
+    },
+    {
       accessorKey: "NROPM",
       header: "Nro. PM",
       cell: ({ row }) => (
@@ -108,6 +120,48 @@ export const createNivelColumns = (props?: NivelColumnsProps): ColumnDef<Nivel>[
           row={row}
           field="NROPM"
           inputType="number"
+        />
+      ),
+    },
+    {
+      accessorKey: "COMENTARIO",
+      header: "Comentario",
+      cell: ({ row }) => (
+        <EditableCell<Nivel, "COMENTARIO">
+          row={row}
+          field="COMENTARIO"
+          inputType="text"
+        />
+      ),
+    },
+    {
+      accessorKey: "ID_USR",
+      header: "ID Usuario",
+      cell: ({ row }) => (
+        <EditableCell<Nivel, "ID_USR">
+          row={row}
+          field="ID_USR"
+          inputType="number"
+        />
+      ),
+    },
+    {
+      accessorKey: "FECHA_CREACION",
+      header: "Fecha Creación",
+      cell: ({ getValue }) => {
+        const value = getValue<string | Date | null>();
+        if (!value) return <span className="text-muted-foreground">-</span>;
+        return <span>{format(new Date(value), "dd/MM/yyyy")}</span>;
+      },
+    },
+    {
+      accessorKey: "ICONO",
+      header: "Ícono",
+      cell: ({ row }) => (
+        <EditableCell<Nivel, "ICONO">
+          row={row}
+          field="ICONO"
+          inputType="icon"
         />
       ),
     },
@@ -144,5 +198,3 @@ export const createNivelColumns = (props?: NivelColumnsProps): ColumnDef<Nivel>[
 
 // Export default columns para compatibilidad
 export const nivelColumns = createNivelColumns();
-
-

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { TreeView, TreeDataItem } from '@/components/tree-view';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { getAllJerarquias, getAllNiveles, getAllActividadNiveles, getAllAtributos } from '@/lib/api';
 import type { Jerarquia, Nivel, ActividadNivel, Atributo } from '@/models';
 import { buildNivelTree } from '@/lib/utils/build-nivel-tree';
@@ -89,19 +90,16 @@ export function NivelTreeView() {
     ? (selectedItem.metadata.data as ActividadNivel)
     : null;
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-4">
-      {/* Panel izquierdo - Tree View */}
-      <div className="lg:sticky lg:top-8 lg:h-fit">
-        <Card>
+  const renderTreeContent = (isResizable = false) => (
+    <Card className={isResizable ? "h-full border-0 shadow-none rounded-none" : ""}>
           <CardHeader>
             <CardTitle className="text-lg">Jerarquía de Niveles</CardTitle>
             <CardDescription className="text-xs">
               Estructura jerárquica del sistema
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-200px)] min-w-[300px] p-4">
+      <CardContent className="p-0 h-[calc(100%-80px)]">
+        <div className={`overflow-x-auto overflow-y-auto p-4 ${isResizable ? "h-full" : "max-h-[calc(100vh-200px)] min-w-[300px]"}`}>
               {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -123,11 +121,10 @@ export function NivelTreeView() {
             </div>
           </CardContent>
         </Card>
-      </div>
+  );
 
-      {/* Panel derecho - Información del item seleccionado */}
-      <div>
-        <Card>
+  const renderDetailContent = (isResizable = false) => (
+    <Card className={isResizable ? "h-full border-0 shadow-none rounded-none" : ""}>
           <CardHeader>
             <CardTitle>Información</CardTitle>
             <CardDescription>
@@ -163,8 +160,37 @@ export function NivelTreeView() {
             )}
           </CardContent>
         </Card>
+  );
+
+  return (
+    <>
+      {/* Mobile View - Stacked */}
+      <div className="grid grid-cols-1 gap-4 lg:hidden">
+        <div>
+          {renderTreeContent(false)}
+        </div>
+        <div>
+          {renderDetailContent(false)}
+        </div>
       </div>
+
+      {/* Desktop View - Resizable Panel */}
+      <div className="hidden lg:block h-[calc(100vh-140px)] border rounded-lg overflow-hidden bg-background shadow-sm">
+        <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="bg-card">
+            {renderTreeContent(true)}
+          </ResizablePanel>
+          
+          <ResizableHandle withHandle />
+          
+          <ResizablePanel defaultSize={75} className="bg-card">
+            <div className="h-full overflow-y-auto">
+              {renderDetailContent(true)}
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
     </div>
+    </>
   );
 }
 

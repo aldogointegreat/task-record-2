@@ -72,11 +72,16 @@ export async function PUT(
 
     // Construir SET clause dinámico
     const updates: string[] = [];
-    const params: Record<string, unknown> = { ID: id };
+    const queryParams: Record<string, unknown> = { ID: id };
 
     if (body.DESCRIPCION !== undefined) {
       updates.push('DESCRIPCION = @DESCRIPCION');
-      params.DESCRIPCION = body.DESCRIPCION;
+      queryParams.DESCRIPCION = body.DESCRIPCION;
+    }
+
+    if (body.COLOR !== undefined) {
+      updates.push('COLOR = @COLOR');
+      queryParams.COLOR = body.COLOR;
     }
 
     if (updates.length === 0) {
@@ -93,7 +98,7 @@ export async function PUT(
       OUTPUT INSERTED.*
       WHERE IDJ = @ID`;
 
-    const result = await query<Jerarquia>(sqlQuery, params);
+    const result = await query<Jerarquia>(sqlQuery, queryParams);
 
     if (result.length === 0) {
       return NextResponse.json({

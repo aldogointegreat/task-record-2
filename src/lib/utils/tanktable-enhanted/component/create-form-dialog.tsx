@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { CreateFormConfig, FormField } from "../types/tank-table.types";
+import { IconPicker } from "@/components/ui/icon-picker";
 
 interface CreateFormDialogProps<TData extends object> {
   open: boolean;
@@ -128,21 +129,41 @@ function FormFieldRenderer<TData extends object>({
           </Select>
         </div>
       );
+    case "icon":
+      return (
+        <div className="space-y-2" key={field.name}>
+          <Label htmlFor={field.name}>{field.label}</Label>
+          <IconPicker
+            value={String(value ?? "")}
+            onChange={(val) => setFieldValue(formValues, setFormValues, field.name, val)}
+            placeholder={field.placeholder}
+          />
+        </div>
+      );
     case "date":
+    case "color":
     case "text":
     default:
       return (
         <div className="space-y-2" key={field.name}>
           <Label htmlFor={field.name}>{field.label}</Label>
-          <Input
-            type={field.inputType === "date" ? "date" : "text"}
-            {...common}
-            readOnly={field.readOnly}
-            value={String(value ?? "")}
-            placeholder={field.placeholder}
-            className={field.className}
-            onChange={(e) => setFieldValue(formValues, setFormValues, field.name, e.target.value)}
-          />
+          <div className={field.inputType === "color" ? "flex gap-2 items-center" : ""}>
+            <Input
+              type={field.inputType === "date" ? "date" : field.inputType === "color" ? "color" : "text"}
+              {...common}
+              readOnly={field.readOnly}
+              value={String(value ?? "")}
+              placeholder={field.placeholder}
+              className={field.className}
+              onChange={(e) => setFieldValue(formValues, setFormValues, field.name, e.target.value)}
+              style={field.inputType === "color" ? { width: '60px', padding: '2px' } : undefined}
+            />
+             {field.inputType === "color" && (
+                <span className="text-sm text-muted-foreground font-mono">
+                  {String(value ?? "")}
+                </span>
+              )}
+          </div>
         </div>
       );
   }

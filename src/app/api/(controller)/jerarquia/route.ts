@@ -75,6 +75,12 @@ export async function POST(request: NextRequest) {
       params.DESCRIPCION = body.DESCRIPCION;
     }
 
+    if (body.COLOR !== undefined) {
+      fields.push('COLOR');
+      values.push('@COLOR');
+      params.COLOR = body.COLOR;
+    }
+
     const sqlQuery = `
       INSERT INTO [JERARQUIA] (${fields.join(', ')})
       OUTPUT INSERTED.*

@@ -126,6 +126,12 @@ export async function POST(request: NextRequest) {
       params.NROPM = body.NROPM;
     }
 
+    if (body.ICONO !== undefined) {
+      fields.push('ICONO');
+      values.push('@ICONO');
+      params.ICONO = body.ICONO;
+    }
+
     const sqlQuery = `
       INSERT INTO [NIVEL] (${fields.join(', ')})
       OUTPUT INSERTED.*

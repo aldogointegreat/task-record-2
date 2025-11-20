@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { getIconComponent } from "@/lib/constants/app-icons";
 import { FaSave } from "react-icons/fa";
 import { ImCross } from "react-icons/im";
 import { MdEdit } from "react-icons/md";
@@ -87,6 +89,25 @@ const inputRegistry: Record<
       onChange={(e) => onChange(e.target.value as any)}
     />
   ),
+  color: ({ value, onChange }) => (
+    <div className="flex items-center gap-2">
+      <Input
+        type="color"
+        value={String(value)}
+        onChange={(e) => onChange(e.target.value as any)}
+        className="w-16 p-1 h-8"
+      />
+      <span className="text-xs font-mono text-muted-foreground">
+        {String(value)}
+      </span>
+    </div>
+  ),
+  icon: ({ value, onChange }) => (
+    <IconPicker
+      value={String(value ?? "")}
+      onChange={(val) => onChange(val as any)}
+    />
+  ),
 };
 
 export function EditableCell<T, K extends keyof T>({
@@ -125,11 +146,39 @@ export function EditableCell<T, K extends keyof T>({
       displayText = String(rawValue as any);
     }
 
+    if (inputType === "color") {
+      return (
+        <div className="flex items-center gap-2">
+          {String(rawValue) && String(rawValue) !== 'null' && (
+            <div
+              className="w-4 h-4 rounded-full border border-gray-200"
+              style={{ backgroundColor: String(rawValue) }}
+            />
+          )}
+          <span className="font-mono text-sm text-muted-foreground">
+            {String(rawValue) === 'null' ? '-' : String(rawValue)}
+          </span>
+        </div>
+      );
+    }
+
+    if (inputType === "icon") {
+      const IconComponent = getIconComponent(String(rawValue));
+      return (
+        <div className="flex items-center gap-2">
+          {IconComponent && <IconComponent className="h-4 w-4" />}
+          <span className="text-sm text-muted-foreground">
+            {String(rawValue) || '-'}
+          </span>
+        </div>
+      );
+    }
+
     return (
       <span
         className={
           isDescription
-            ? "block max-w-[400px] md:break-words md:whitespace-normal truncate"
+            ? "block max-w-[400px] md:wrap-break-word md:whitespace-normal truncate"
             : ""
         }
       >
