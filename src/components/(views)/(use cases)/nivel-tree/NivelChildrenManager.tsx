@@ -270,7 +270,7 @@ export function NivelChildrenManager({
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label htmlFor="nombre">Nombre *</Label>
+              <Label htmlFor="nombre" className="mb-2 block">Nombre *</Label>
               <Input
                 id="nombre"
                 value={formData.NOMBRE}
@@ -280,7 +280,7 @@ export function NivelChildrenManager({
             </div>
 
             <div>
-              <Label htmlFor="jerarquia">Jerarquía *</Label>
+              <Label htmlFor="jerarquia" className="mb-2 block">Jerarquía *</Label>
               <Select
                 value={formData.IDJ.toString()}
                 onValueChange={(value) => setFormData({ ...formData, IDJ: Number(value) })}
@@ -299,7 +299,7 @@ export function NivelChildrenManager({
             </div>
 
             <div>
-              <Label htmlFor="nropm">Número de PM</Label>
+              <Label htmlFor="nropm" className="mb-2 block">Número de PM</Label>
               <Input
                 id="nropm"
                 type="number"
@@ -310,7 +310,7 @@ export function NivelChildrenManager({
             </div>
 
             <div>
-              <Label htmlFor="comentario">Comentario</Label>
+              <Label htmlFor="comentario" className="mb-2 block">Comentario</Label>
               <Input
                 id="comentario"
                 value={formData.COMENTARIO}
@@ -320,7 +320,7 @@ export function NivelChildrenManager({
             </div>
 
             <div>
-              <Label htmlFor="icono">Ícono</Label>
+              <Label htmlFor="icono" className="mb-2 block">Ícono</Label>
               <IconPicker
                 value={formData.ICONO}
                 onChange={(value) => setFormData({ ...formData, ICONO: value })}
@@ -352,7 +352,7 @@ export function NivelChildrenManager({
             </div>
 
             <div>
-              <Label htmlFor="id_usr">ID Usuario</Label>
+              <Label htmlFor="id_usr" className="mb-2 block">ID Usuario</Label>
               <Input
                 id="id_usr"
                 type="number"
@@ -384,7 +384,7 @@ export function NivelChildrenManager({
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label htmlFor="edit-nombre">Nombre *</Label>
+              <Label htmlFor="edit-nombre" className="mb-2 block">Nombre *</Label>
               <Input
                 id="edit-nombre"
                 value={formData.NOMBRE}
@@ -394,7 +394,7 @@ export function NivelChildrenManager({
             </div>
 
             <div>
-              <Label htmlFor="edit-jerarquia">Jerarquía *</Label>
+              <Label htmlFor="edit-jerarquia" className="mb-2 block">Jerarquía *</Label>
               <Select
                 value={formData.IDJ.toString()}
                 onValueChange={(value) => setFormData({ ...formData, IDJ: Number(value) })}
@@ -413,7 +413,7 @@ export function NivelChildrenManager({
             </div>
 
             <div>
-              <Label htmlFor="edit-nropm">Número de PM</Label>
+              <Label htmlFor="edit-nropm" className="mb-2 block">Número de PM</Label>
               <Input
                 id="edit-nropm"
                 type="number"
@@ -424,7 +424,7 @@ export function NivelChildrenManager({
             </div>
 
             <div>
-              <Label htmlFor="edit-comentario">Comentario</Label>
+              <Label htmlFor="edit-comentario" className="mb-2 block">Comentario</Label>
               <Input
                 id="edit-comentario"
                 value={formData.COMENTARIO}
@@ -434,7 +434,7 @@ export function NivelChildrenManager({
             </div>
 
             <div>
-              <Label htmlFor="edit-icono">Ícono</Label>
+              <Label htmlFor="edit-icono" className="mb-2 block">Ícono</Label>
               <IconPicker
                 value={formData.ICONO}
                 onChange={(value) => setFormData({ ...formData, ICONO: value })}
@@ -466,7 +466,7 @@ export function NivelChildrenManager({
             </div>
 
             <div>
-              <Label htmlFor="edit-id_usr">ID Usuario</Label>
+              <Label htmlFor="edit-id_usr" className="mb-2 block">ID Usuario</Label>
               <Input
                 id="edit-id_usr"
                 type="number"

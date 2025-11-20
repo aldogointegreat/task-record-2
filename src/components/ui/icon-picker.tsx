@@ -71,20 +71,29 @@ export function IconPicker({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
-        <Command shouldFilter={false}>
+      <PopoverContent 
+        className="w-[300px] p-0 z-[100]" 
+        align="start"
+      >
+        <Command shouldFilter={false} className="overflow-hidden">
           <CommandInput 
             placeholder="Buscar ícono..." 
             value={search}
             onValueChange={setSearch}
           />
-          <CommandList>
+          <CommandList 
+            className="max-h-[300px] overflow-y-auto overflow-x-hidden"
+            onWheel={(e) => {
+              // Asegurar que el scroll del CommandList no se propague
+              e.stopPropagation();
+            }}
+          >
             {icons.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
                 No se encontraron íconos.
               </div>
             ) : (
-              <CommandGroup className="max-h-[300px] overflow-y-auto">
+              <CommandGroup>
                 <div className="grid grid-cols-4 gap-2 p-2">
                   {icons.map((icon) => (
                   <div

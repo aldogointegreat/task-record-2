@@ -226,7 +226,7 @@ export function NivelActividadesManager({
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label htmlFor="descripcion" className="pb-3">Descripción *</Label>
+              <Label htmlFor="descripcion" className="mb-2 block">Descripción *</Label>
               <Input
                 id="descripcion"
                 value={formData.DESCRIPCION}
@@ -235,7 +235,7 @@ export function NivelActividadesManager({
               />
             </div>
             <div>
-              <Label htmlFor="orden" className="pb-3">Orden *</Label>
+              <Label htmlFor="orden" className="mb-2 block">Orden *</Label>
               <Input
                 id="orden"
                 type="number"
@@ -244,7 +244,7 @@ export function NivelActividadesManager({
               />
             </div>
             <div>
-              <Label htmlFor="atributo" className="pb-3">Atributo (Opcional)</Label>
+              <Label htmlFor="atributo" className="mb-2 block">Atributo (Opcional)</Label>
               <Select
                 value={formData.IDT?.toString() || '__null__'}
                 onValueChange={(value) => setFormData({ ...formData, IDT: value === '__null__' ? null : parseInt(value) })}
@@ -285,7 +285,7 @@ export function NivelActividadesManager({
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
-              <Label htmlFor="edit-descripcion">Descripción *</Label>
+              <Label htmlFor="edit-descripcion" className="mb-2 block">Descripción *</Label>
               <Input
                 id="edit-descripcion"
                 value={formData.DESCRIPCION}
@@ -294,7 +294,7 @@ export function NivelActividadesManager({
               />
             </div>
             <div>
-              <Label htmlFor="edit-orden">Orden *</Label>
+              <Label htmlFor="edit-orden" className="mb-2 block">Orden *</Label>
               <Input
                 id="edit-orden"
                 type="number"
@@ -303,7 +303,7 @@ export function NivelActividadesManager({
               />
             </div>
             <div>
-              <Label htmlFor="edit-atributo">Atributo (Opcional)</Label>
+              <Label htmlFor="edit-atributo" className="mb-2 block">Atributo (Opcional)</Label>
               <Select
                 value={formData.IDT?.toString() || '__null__'}
                 onValueChange={(value) => setFormData({ ...formData, IDT: value === '__null__' ? null : parseInt(value) })}
