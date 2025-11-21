@@ -37,7 +37,27 @@ export function PMList() {
         setPMs(pmResult.data);
       }
       if (nivelesResult.success && nivelesResult.data) {
-        setNiveles(nivelesResult.data);
+        // Filtrar niveles: excluir los que tengan GENERADO=true, PLANTILLA=true o que tengan registros en PM
+        const pmIds = new Set(pmResult.data?.map(pm => pm.IDN) || []);
+        const nivelesFiltrados = nivelesResult.data.filter(nivel => {
+          // Excluir si tiene GENERADO = true (GEN)
+          if (nivel.GENERADO) return false;
+          // Excluir si tiene PLANTILLA = true (PLT)
+          if (nivel.PLANTILLA) return false;
+          // Excluir si tiene registros en PM (PM)
+          if (pmIds.has(nivel.IDN)) return false;
+          return true;
+        });
+        
+        // Imprimir en consola para debug
+        console.log('=== IDNs filtrados para PM ===');
+        console.log('Total niveles originales:', nivelesResult.data.length);
+        console.log('Niveles filtrados (disponibles para PM):', nivelesFiltrados.length);
+        console.log('Objetos IDN filtrados:', nivelesFiltrados);
+        console.log('IDs de niveles excluidos (tienen PM):', Array.from(pmIds));
+        console.log('================================');
+        
+        setNiveles(nivelesFiltrados);
       }
     } catch (error) {
       console.error('Error loading data:', error);
