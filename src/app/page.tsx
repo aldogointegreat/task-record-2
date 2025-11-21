@@ -74,6 +74,14 @@ export default function Home() {
                   hoverColor: 'hover:bg-green-500/20',
                 },
                 {
+                  title: 'Disciplinas de Nivel',
+                  description: 'Catálogo de disciplinas para niveles jerárquicos',
+                  icon: ClipboardList,
+                  href: '/disciplina-nivel',
+                  color: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+                  hoverColor: 'hover:bg-rose-500/20',
+                },
+                {
                   title: 'Niveles',
                   description: 'Gestión de niveles jerárquicos (CRUD)',
                   icon: Network,

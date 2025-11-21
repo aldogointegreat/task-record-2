@@ -1,6 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import type { Nivel, UpdateNivelDTO } from '@/models';
+import type { Nivel, UpdateNivelDTO, ActividadNivel } from '@/models';
+
+/**
+ * Función auxiliar para eliminar un nivel en cascada
+ * Elimina recursivamente: atributos-valor -> actividades -> niveles hijos -> nivel
+ */
+async function eliminarNivelCascada(nivelId: number): Promise<void> {
+  console.log(`🗑️ Eliminando en cascada nivel IDN: ${nivelId}`);
+  
+  // 1. Obtener todas las actividades de este nivel
+  const actividades = await query<ActividadNivel>(
+    `SELECT * FROM [ACTIVIDAD_NIVEL] WHERE IDN = @idn`,
+    { idn: nivelId }
+  );
+  
+  console.log(`  📋 Encontradas ${actividades.length} actividades a eliminar`);
+  
+  // 2. Para cada actividad, eliminar sus atributos-valor primero
+  for (const actividad of actividades) {
+    console.log(`    🗑️ Eliminando atributos-valor de actividad IDA: ${actividad.IDA}`);
+    await query(
+      `DELETE FROM [ATRIBUTO_VALOR] WHERE IDA = @ida`,
+      { ida: actividad.IDA }
+    );
+  }
+  
+  // 3. Eliminar todas las actividades del nivel
+  if (actividades.length > 0) {
+    console.log(`  🗑️ Eliminando ${actividades.length} actividades del nivel`);
+    await query(
+      `DELETE FROM [ACTIVIDAD_NIVEL] WHERE IDN = @idn`,
+      { idn: nivelId }
+    );
+  }
+  
+  // 4. Obtener todos los niveles hijos
+  const nivelesHijos = await query<Nivel>(
+    `SELECT * FROM [NIVEL] WHERE IDNP = @idnp`,
+    { idnp: nivelId }
+  );
+  
+  console.log(`  📁 Encontrados ${nivelesHijos.length} niveles hijos a eliminar`);
+  
+  // 5. Recursivamente eliminar cada nivel hijo
+  for (const hijo of nivelesHijos) {
+    await eliminarNivelCascada(hijo.IDN);
+  }
+  
+  // 6. Finalmente, eliminar el nivel mismo
+  console.log(`  ✅ Eliminando nivel IDN: ${nivelId}`);
+  await query(
+    `DELETE FROM [NIVEL] WHERE IDN = @idn`,
+    { idn: nivelId }
+  );
+}
 
 /**
  * GET /api/nivel/[id]
@@ -100,12 +154,12 @@ export async function PUT(
 
     if (body.ICONO !== undefined) {
       updates.push('ICONO = @ICONO');
-      queryParams.ICONO = body.ICONO;
+      queryParams.ICONO = body.ICONO && body.ICONO.trim() !== '' ? body.ICONO : null;
     }
 
-    if (body.GENERADO !== undefined) {
-      updates.push('GENERADO = @GENERADO');
-      queryParams.GENERADO = body.GENERADO ? 1 : 0;
+    if (body.GENERICO !== undefined) {
+      updates.push('GENERICO = @GENERICO');
+      queryParams.GENERICO = body.GENERICO ? 1 : 0;
     }
 
     if (body.COMENTARIO !== undefined) {
@@ -116,6 +170,16 @@ export async function PUT(
     if (body.ID_USR !== undefined) {
       updates.push('ID_USR = @ID_USR');
       queryParams.ID_USR = body.ID_USR || null;
+    }
+
+    if (body.ID_DISCIPLINA_NIVEL !== undefined) {
+      updates.push('ID_DISCIPLINA_NIVEL = @ID_DISCIPLINA_NIVEL');
+      queryParams.ID_DISCIPLINA_NIVEL = body.ID_DISCIPLINA_NIVEL || null;
+    }
+
+    if (body.UNIDAD_MANTENIBLE !== undefined) {
+      updates.push('UNIDAD_MANTENIBLE = @UNIDAD_MANTENIBLE');
+      queryParams.UNIDAD_MANTENIBLE = body.UNIDAD_MANTENIBLE ? 1 : 0;
     }
 
     if (updates.length === 0) {
@@ -160,6 +224,7 @@ export async function PUT(
 
 /**
  * DELETE /api/nivel/[id]
+ * Elimina un nivel en cascada (con todos sus hijos, actividades y atributos)
  */
 export async function DELETE(
   request: NextRequest,
@@ -177,14 +242,13 @@ export async function DELETE(
       }, { status: 400 });
     }
 
-    const sqlQuery = `
-      DELETE FROM [NIVEL]
-      OUTPUT DELETED.*
-      WHERE IDN = @ID`;
+    // Verificar que el nivel existe antes de eliminarlo
+    const nivelExistente = await query<Nivel>(
+      `SELECT * FROM [NIVEL] WHERE IDN = @id`,
+      { id }
+    );
 
-    const result = await query<Nivel>(sqlQuery, { ID: id });
-
-    if (result.length === 0) {
+    if (nivelExistente.length === 0) {
       return NextResponse.json({
         success: false,
         data: null,
@@ -192,10 +256,17 @@ export async function DELETE(
       }, { status: 404 });
     }
 
+    const nivelEliminado = nivelExistente[0];
+
+    // Eliminar en cascada
+    console.log(`🚀 Iniciando eliminación en cascada de nivel ${id} (${nivelEliminado.NOMBRE})`);
+    await eliminarNivelCascada(id);
+    console.log(`✅ Eliminación en cascada completada`);
+
     return NextResponse.json({
       success: true,
-      data: result[0],
-      message: 'Nivel eliminado exitosamente',
+      data: nivelEliminado,
+      message: 'Nivel y todos sus dependientes eliminados exitosamente',
     }, { status: 200 });
 
   } catch (error) {

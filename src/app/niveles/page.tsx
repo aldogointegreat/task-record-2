@@ -2,12 +2,9 @@ import { NivelTreeView } from "@/components/(views)/(use cases)/nivel-tree/Nivel
 
 export default function NivelesPage() {
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-2">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Mantención de Niveles</h1>
-        <p className="text-muted-foreground">
-          Visualiza y gestiona la estructura jerárquica de niveles del sistema
-        </p>
+        <h1 className="text-3xl font-bold mb-2">Análisis RCM</h1>
       </div>
       <NivelTreeView />
     </div>

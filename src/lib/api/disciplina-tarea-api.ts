@@ -1,0 +1,99 @@
+import type { 
+  DisciplinaTarea, 
+  CreateDisciplinaTareaDTO,
+  UpdateDisciplinaTareaDTO,
+  DisciplinaTareaFilters 
+} from '@/models';
+import type { DbActionResult } from '@/types/common';
+
+export async function getAllDisciplinasTarea(
+  filters?: DisciplinaTareaFilters
+): Promise<DbActionResult<DisciplinaTarea[]>> {
+  try {
+    const params = new URLSearchParams();
+    if (filters?.CODIGO) params.append('CODIGO', filters.CODIGO);
+    if (filters?.NOMBRE) params.append('NOMBRE', filters.NOMBRE);
+
+    const url = `/api/disciplina-tarea${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await fetch(url);
+    return await response.json();
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      message: error instanceof Error ? error.message : 'Error al obtener disciplinas de tarea',
+    };
+  }
+}
+
+export async function getDisciplinaTareaById(
+  id: number
+): Promise<DbActionResult<DisciplinaTarea>> {
+  try {
+    const response = await fetch(`/api/disciplina-tarea/${id}`);
+    return await response.json();
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      message: error instanceof Error ? error.message : 'Error al obtener disciplina de tarea',
+    };
+  }
+}
+
+export async function createDisciplinaTarea(
+  data: CreateDisciplinaTareaDTO
+): Promise<DbActionResult<DisciplinaTarea>> {
+  try {
+    const response = await fetch('/api/disciplina-tarea', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return await response.json();
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      message: error instanceof Error ? error.message : 'Error al crear disciplina de tarea',
+    };
+  }
+}
+
+export async function updateDisciplinaTarea(
+  id: number,
+  data: UpdateDisciplinaTareaDTO
+): Promise<DbActionResult<DisciplinaTarea>> {
+  try {
+    const response = await fetch(`/api/disciplina-tarea/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return await response.json();
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      message: error instanceof Error ? error.message : 'Error al actualizar disciplina de tarea',
+    };
+  }
+}
+
+export async function deleteDisciplinaTarea(
+  id: number
+): Promise<DbActionResult<DisciplinaTarea>> {
+  try {
+    const response = await fetch(`/api/disciplina-tarea/${id}`, {
+      method: 'DELETE',
+    });
+    return await response.json();
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      message: error instanceof Error ? error.message : 'Error al eliminar disciplina de tarea',
+    };
+  }
+}
+

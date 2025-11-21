@@ -12,10 +12,12 @@ export interface Nivel {
   NROPM: number;
   ICONO?: string;
   // Nuevos campos
-  GENERADO: boolean;
+  GENERICO: boolean;
   COMENTARIO?: string;
   ID_USR?: number;
   FECHA_CREACION?: Date | string;
+  ID_DISCIPLINA_NIVEL?: number | null;
+  UNIDAD_MANTENIBLE?: boolean;
 }
 
 export interface CreateNivelDTO {
@@ -25,10 +27,12 @@ export interface CreateNivelDTO {
   PLANTILLA?: boolean;
   NROPM?: number;
   ICONO?: string;
-  GENERADO?: boolean;
+  GENERICO?: boolean;
   COMENTARIO?: string;
   ID_USR?: number;
   FECHA_CREACION?: Date | string;
+  ID_DISCIPLINA_NIVEL?: number | null;
+  UNIDAD_MANTENIBLE?: boolean;
 }
 
 export interface UpdateNivelDTO {
@@ -38,10 +42,12 @@ export interface UpdateNivelDTO {
   PLANTILLA?: boolean;
   NROPM?: number;
   ICONO?: string;
-  GENERADO?: boolean;
+  GENERICO?: boolean;
   COMENTARIO?: string;
   ID_USR?: number;
   FECHA_CREACION?: Date | string;
+  ID_DISCIPLINA_NIVEL?: number | null;
+  UNIDAD_MANTENIBLE?: boolean;
 }
 
 export interface NivelFilters {
@@ -49,4 +55,6 @@ export interface NivelFilters {
   IDJ?: number;
   IDNP?: number;
   PLANTILLA?: boolean;
+  ID_DISCIPLINA_NIVEL?: number;
+  UNIDAD_MANTENIBLE?: boolean;
 }

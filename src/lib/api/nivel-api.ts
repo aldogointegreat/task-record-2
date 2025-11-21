@@ -18,6 +18,12 @@ export async function getAllNiveles(
     if (filters?.IDJ !== undefined) params.append('IDJ', filters.IDJ.toString());
     if (filters?.IDNP !== undefined) params.append('IDNP', filters.IDNP.toString());
     if (filters?.PLANTILLA !== undefined) params.append('PLANTILLA', filters.PLANTILLA.toString());
+    if (filters?.ID_DISCIPLINA_NIVEL !== undefined) {
+      params.append('ID_DISCIPLINA_NIVEL', filters.ID_DISCIPLINA_NIVEL.toString());
+    }
+    if (filters?.UNIDAD_MANTENIBLE !== undefined) {
+      params.append('UNIDAD_MANTENIBLE', filters.UNIDAD_MANTENIBLE.toString());
+    }
 
     const url = `/api/nivel${params.toString() ? `?${params.toString()}` : ''}`;
     const response = await fetch(url);
@@ -110,6 +116,28 @@ export async function deleteNivel(
       success: false,
       data: null,
       message: error instanceof Error ? error.message : 'Error al eliminar nivel',
+    };
+  }
+}
+
+/**
+ * Importa un nivel existente (y su estructura) a un nuevo padre
+ */
+export async function importarNivel(sourceId: number, targetParentId: number): Promise<DbActionResult<void>> {
+  try {
+    const response = await fetch('/api/nivel/importar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sourceId, targetParentId }),
+    });
+    return await response.json();
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      message: error instanceof Error ? error.message : 'Error al importar componente',
     };
   }
 }

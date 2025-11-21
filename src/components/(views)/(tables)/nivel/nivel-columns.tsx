@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import type { Nivel, Jerarquia } from "@/models";
+import type { Nivel, Jerarquia, DisciplinaNivel } from "@/models";
 import { ActionsCell, EditableCell } from "@/lib/utils/tanktable-enhanted/component/actions-cell";
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -7,6 +7,7 @@ import { format } from "date-fns";
 interface NivelColumnsProps {
   jerarquias?: Jerarquia[];
   niveles?: Nivel[];
+  disciplinasNivel?: DisciplinaNivel[];
   updatingIds?: Set<number>;
   deletingIds?: Set<number>;
 }
@@ -15,6 +16,7 @@ export const createNivelColumns = (props?: NivelColumnsProps): ColumnDef<Nivel>[
   const { 
     jerarquias = [], 
     niveles = [],
+    disciplinasNivel = [],
     updatingIds = new Set(), 
     deletingIds = new Set() 
   } = props || {};
@@ -67,6 +69,28 @@ export const createNivelColumns = (props?: NivelColumnsProps): ColumnDef<Nivel>[
       ),
     },
     {
+      accessorKey: "ID_DISCIPLINA_NIVEL",
+      header: "Disciplina",
+      cell: ({ row }) => (
+        <EditableCell<Nivel, "ID_DISCIPLINA_NIVEL">
+          row={row}
+          field="ID_DISCIPLINA_NIVEL"
+          inputType="select"
+          meta={{
+            options: [
+              { value: null, label: 'Sin disciplina' },
+              ...disciplinasNivel.map((disc) => ({
+                value: disc.ID_DISCIPLINA_NIVEL,
+                label: `${disc.CODIGO} - ${disc.DESCRIPCION}`,
+              })),
+            ],
+            encode: (v: unknown) => (v === null || v === undefined ? '__null__' : String(v)),
+            decode: (s: string) => (s === '__null__' ? null : Number(s)),
+          }}
+        />
+      ),
+    },
+    {
       accessorKey: "IDNP",
       header: "Nivel Padre",
       cell: ({ row }) => (
@@ -102,12 +126,23 @@ export const createNivelColumns = (props?: NivelColumnsProps): ColumnDef<Nivel>[
       ),
     },
     {
-      accessorKey: "GENERADO",
-      header: "Generado",
+      accessorKey: "GENERICO",
+      header: "Genérico",
       cell: ({ row }) => (
-        <EditableCell<Nivel, "GENERADO">
+        <EditableCell<Nivel, "GENERICO">
           row={row}
-          field="GENERADO"
+          field="GENERICO"
+          inputType="checkbox"
+        />
+      ),
+    },
+    {
+      accessorKey: "UNIDAD_MANTENIBLE",
+      header: "Unidad Mantenible",
+      cell: ({ row }) => (
+        <EditableCell<Nivel, "UNIDAD_MANTENIBLE">
+          row={row}
+          field="UNIDAD_MANTENIBLE"
           inputType="checkbox"
         />
       ),

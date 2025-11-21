@@ -88,14 +88,37 @@ function FormFieldRenderer<TData extends object>({
         </div>
       );
     case "checkbox":
+      // Lógica especial para PLANTILLA y GENERICO: se deshabilitan mutuamente
+      const isPlantilla = field.name === "PLANTILLA";
+      const isGenerico = field.name === "GENERICO";
+      const otherFieldName = isPlantilla ? "GENERICO" : isGenerico ? "PLANTILLA" : null;
+      const otherFieldValue = otherFieldName ? Boolean(formValues[otherFieldName]) : false;
+      const isDisabled = (isPlantilla || isGenerico) && otherFieldValue;
+      
       return (
         <div className="flex items-center space-x-2" key={field.name}>
           <Checkbox
             id={field.name}
             checked={Boolean(value)}
-            onCheckedChange={(checked) => setFieldValue(formValues, setFormValues, field.name, !!checked)}
+            disabled={isDisabled}
+            onCheckedChange={(checked) => {
+              const newValue = !!checked;
+              setFormValues((prev) => {
+                const updated = { ...prev, [field.name]: newValue };
+                // Si se marca uno, desmarcar el otro automáticamente
+                if ((isPlantilla || isGenerico) && newValue && otherFieldName) {
+                  updated[otherFieldName] = false;
+                }
+                return updated;
+              });
+            }}
           />
-          <Label htmlFor={field.name}>{field.label}</Label>
+          <Label 
+            htmlFor={field.name}
+            className={isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+          >
+            {field.label}
+          </Label>
         </div>
       );
     case "select":

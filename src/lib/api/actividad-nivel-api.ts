@@ -112,3 +112,26 @@ export async function deleteActividadNivel(
     };
   }
 }
+
+/**
+ * Copia una actividad de nivel a otro nivel
+ */
+export async function copyActividadNivel(
+  sourceId: number,
+  targetNivelId: number
+): Promise<DbActionResult<ActividadNivel>> {
+  try {
+    const response = await fetch('/api/actividad-nivel/copiar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sourceId, targetNivelId }),
+    });
+    return await response.json();
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      message: error instanceof Error ? error.message : 'Error al copiar actividad de nivel',
+    };
+  }
+}

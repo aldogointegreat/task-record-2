@@ -12,5 +12,9 @@ export * from './(tables)/usuario/UsuarioList';
 export * from './(tables)/nivel/NivelList';
 export * from './(tables)/actividad-nivel/ActividadNivelList';
 export * from './(tables)/atributo-valor/AtributoValorList';
+export * from './(tables)/consecuencia-falla/ConsecuenciaFallaList';
+export * from './(tables)/clase-mantencion/ClaseMantencionList';
+export * from './(tables)/condicion-acceso/CondicionAccesoList';
+export * from './(tables)/disciplina-tarea/DisciplinaTareaList';
+export * from './(tables)/disciplina-nivel/DisciplinaNivelList';
 export * from './(tables)/pauta/PMList';
-

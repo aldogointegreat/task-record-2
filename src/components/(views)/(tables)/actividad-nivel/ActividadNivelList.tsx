@@ -8,9 +8,23 @@ import {
   updateActividadNivel, 
   deleteActividadNivel,
   getAllNiveles,
-  getAllAtributos
+  getAllAtributos,
+  getAllConsecuenciasFalla,
+  getAllClasesMantencion,
+  getAllCondicionesAcceso,
+  getAllDisciplinasTarea
 } from '@/lib/api';
-import type { ActividadNivel, CreateActividadNivelDTO, UpdateActividadNivelDTO, Nivel, Atributo } from '@/models';
+import type { 
+  ActividadNivel, 
+  CreateActividadNivelDTO, 
+  UpdateActividadNivelDTO, 
+  Nivel, 
+  Atributo,
+  ConsecuenciaFalla,
+  ClaseMantencion,
+  CondicionAcceso,
+  DisciplinaTarea
+} from '@/models';
 import { createActividadNivelColumns } from './actividad-nivel-columns';
 import { toast } from 'sonner';
 
@@ -18,6 +32,10 @@ export function ActividadNivelList() {
   const [actividadesNivel, setActividadesNivel] = useState<ActividadNivel[]>([]);
   const [niveles, setNiveles] = useState<Nivel[]>([]);
   const [atributos, setAtributos] = useState<Atributo[]>([]);
+  const [consecuenciasFalla, setConsecuenciasFalla] = useState<ConsecuenciaFalla[]>([]);
+  const [clasesMantencion, setClasesMantencion] = useState<ClaseMantencion[]>([]);
+  const [condicionesAcceso, setCondicionesAcceso] = useState<CondicionAcceso[]>([]);
+  const [disciplinasTarea, setDisciplinasTarea] = useState<DisciplinaTarea[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingIds, setUpdatingIds] = useState<Set<number>>(new Set());
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
@@ -30,10 +48,22 @@ export function ActividadNivelList() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [actividadesResult, nivelesResult, atributosResult] = await Promise.all([
+      const [
+        actividadesResult, 
+        nivelesResult, 
+        atributosResult,
+        consecuenciasResult,
+        clasesResult,
+        condicionesResult,
+        disciplinasResult
+      ] = await Promise.all([
         getAllActividadNiveles(),
         getAllNiveles(),
         getAllAtributos(),
+        getAllConsecuenciasFalla(),
+        getAllClasesMantencion(),
+        getAllCondicionesAcceso(),
+        getAllDisciplinasTarea(),
       ]);
 
       if (actividadesResult.success && actividadesResult.data) {
@@ -44,6 +74,18 @@ export function ActividadNivelList() {
       }
       if (atributosResult.success && atributosResult.data) {
         setAtributos(atributosResult.data);
+      }
+      if (consecuenciasResult.success && consecuenciasResult.data) {
+        setConsecuenciasFalla(consecuenciasResult.data);
+      }
+      if (clasesResult.success && clasesResult.data) {
+        setClasesMantencion(clasesResult.data);
+      }
+      if (condicionesResult.success && condicionesResult.data) {
+        setCondicionesAcceso(condicionesResult.data);
+      }
+      if (disciplinasResult.success && disciplinasResult.data) {
+        setDisciplinasTarea(disciplinasResult.data);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -61,6 +103,20 @@ export function ActividadNivelList() {
         IDT: data.IDT ?? null,
         ORDEN: data.ORDEN,
         DESCRIPCION: data.DESCRIPCION,
+        FUNCIONALIDAD: data.FUNCIONALIDAD ?? null,
+        MODO_FALLA: data.MODO_FALLA ?? null,
+        EFECTO_FALLA: data.EFECTO_FALLA ?? null,
+        TIEMPO_PROMEDIO_FALLA: data.TIEMPO_PROMEDIO_FALLA ?? null,
+        UNIDAD_TIEMPO_FALLA: data.UNIDAD_TIEMPO_FALLA ?? null,
+        ID_CONSECUENCIA_FALLA: data.ID_CONSECUENCIA_FALLA ?? null,
+        ID_CLASE_MANTENCION: data.ID_CLASE_MANTENCION ?? null,
+        TAREA_MANTENCION: data.TAREA_MANTENCION ?? null,
+        FRECUENCIA_TAREA: data.FRECUENCIA_TAREA ?? null,
+        UNIDAD_FRECUENCIA: data.UNIDAD_FRECUENCIA ?? null,
+        DURACION_TAREA: data.DURACION_TAREA ?? null,
+        CANTIDAD_RECURSOS: data.CANTIDAD_RECURSOS ?? null,
+        ID_CONDICION_ACCESO: data.ID_CONDICION_ACCESO ?? null,
+        ID_DISCIPLINA_TAREA: data.ID_DISCIPLINA_TAREA ?? null,
       };
 
       const result = await createActividadNivel(createData);
@@ -90,6 +146,20 @@ export function ActividadNivelList() {
         IDT: data.IDT ?? null,
         ORDEN: data.ORDEN,
         DESCRIPCION: data.DESCRIPCION,
+        FUNCIONALIDAD: data.FUNCIONALIDAD ?? null,
+        MODO_FALLA: data.MODO_FALLA ?? null,
+        EFECTO_FALLA: data.EFECTO_FALLA ?? null,
+        TIEMPO_PROMEDIO_FALLA: data.TIEMPO_PROMEDIO_FALLA ?? null,
+        UNIDAD_TIEMPO_FALLA: data.UNIDAD_TIEMPO_FALLA ?? null,
+        ID_CONSECUENCIA_FALLA: data.ID_CONSECUENCIA_FALLA ?? null,
+        ID_CLASE_MANTENCION: data.ID_CLASE_MANTENCION ?? null,
+        TAREA_MANTENCION: data.TAREA_MANTENCION ?? null,
+        FRECUENCIA_TAREA: data.FRECUENCIA_TAREA ?? null,
+        UNIDAD_FRECUENCIA: data.UNIDAD_FRECUENCIA ?? null,
+        DURACION_TAREA: data.DURACION_TAREA ?? null,
+        CANTIDAD_RECURSOS: data.CANTIDAD_RECURSOS ?? null,
+        ID_CONDICION_ACCESO: data.ID_CONDICION_ACCESO ?? null,
+        ID_DISCIPLINA_TAREA: data.ID_DISCIPLINA_TAREA ?? null,
       };
 
       const result = await updateActividadNivel(data.IDA, updateData);
@@ -145,6 +215,10 @@ export function ActividadNivelList() {
   const columns = createActividadNivelColumns({ 
     niveles,
     atributos,
+    consecuenciasFalla,
+    clasesMantencion,
+    condicionesAcceso,
+    disciplinasTarea,
     updatingIds,
     deletingIds,
   });
@@ -208,6 +282,144 @@ export function ActividadNivelList() {
               inputType: 'number',
               required: true,
               placeholder: '1',
+            },
+            {
+              name: 'FUNCIONALIDAD',
+              label: 'Funcionalidad',
+              inputType: 'textarea',
+              placeholder: 'Describir la función principal del componente',
+            },
+            {
+              name: 'MODO_FALLA',
+              label: 'Modo de Falla',
+              inputType: 'textarea',
+              placeholder: 'Describir los modos de falla posibles',
+            },
+            {
+              name: 'EFECTO_FALLA',
+              label: 'Efecto de la Falla',
+              inputType: 'textarea',
+              placeholder: 'Describir los efectos típicos de la falla',
+            },
+            {
+              name: 'TIEMPO_PROMEDIO_FALLA',
+              label: 'Tiempo Promedio entre Falla',
+              inputType: 'number',
+              placeholder: '10',
+            },
+            {
+              name: 'UNIDAD_TIEMPO_FALLA',
+              label: 'Unidad de Tiempo (Falla)',
+              inputType: 'select',
+              options: [
+                { value: null, label: 'Sin especificar' },
+                { value: 'Segundos', label: 'Segundos' },
+                { value: 'Minutos', label: 'Minutos' },
+                { value: 'Horas', label: 'Horas' },
+                { value: 'Días', label: 'Días' },
+                { value: 'Semanas', label: 'Semanas' },
+                { value: 'Meses', label: 'Meses' },
+                { value: 'Años', label: 'Años' },
+              ],
+              encode: (v) => (v === null || v === undefined ? '__null__' : String(v)),
+              decode: (s) => (s === '__null__' ? null : s),
+            },
+            {
+              name: 'ID_CONSECUENCIA_FALLA',
+              label: 'Consecuencia de Falla',
+              inputType: 'select',
+              options: [
+                { value: null, label: 'Sin especificar' },
+                ...consecuenciasFalla.map((c) => ({
+                  value: c.ID_CONSECUENCIA,
+                  label: `${c.CODIGO} - ${c.NOMBRE}`,
+                })),
+              ],
+              encode: (v) => (v === null || v === undefined ? '__null__' : String(v)),
+              decode: (s) => (s === '__null__' ? null : Number(s)),
+            },
+            {
+              name: 'ID_CLASE_MANTENCION',
+              label: 'Clase de Mantención',
+              inputType: 'select',
+              options: [
+                { value: null, label: 'Sin especificar' },
+                ...clasesMantencion.map((c) => ({
+                  value: c.ID_CLASE,
+                  label: `${c.CODIGO} - ${c.NOMBRE}`,
+                })),
+              ],
+              encode: (v) => (v === null || v === undefined ? '__null__' : String(v)),
+              decode: (s) => (s === '__null__' ? null : Number(s)),
+            },
+            {
+              name: 'TAREA_MANTENCION',
+              label: 'Tarea de Mantención',
+              inputType: 'textarea',
+              placeholder: 'Describir la tarea de mantención a realizar',
+            },
+            {
+              name: 'FRECUENCIA_TAREA',
+              label: 'Frecuencia de la Tarea',
+              inputType: 'number',
+              placeholder: '1',
+            },
+            {
+              name: 'UNIDAD_FRECUENCIA',
+              label: 'Unidad de Frecuencia',
+              inputType: 'select',
+              options: [
+                { value: null, label: 'Sin especificar' },
+                { value: 'Segundos', label: 'Segundos' },
+                { value: 'Minutos', label: 'Minutos' },
+                { value: 'Horas', label: 'Horas' },
+                { value: 'Días', label: 'Días' },
+                { value: 'Semanas', label: 'Semanas' },
+                { value: 'Meses', label: 'Meses' },
+                { value: 'Años', label: 'Años' },
+              ],
+              encode: (v) => (v === null || v === undefined ? '__null__' : String(v)),
+              decode: (s) => (s === '__null__' ? null : s),
+            },
+            {
+              name: 'DURACION_TAREA',
+              label: 'Duración de la Tarea (minutos)',
+              inputType: 'number',
+              placeholder: '5',
+            },
+            {
+              name: 'CANTIDAD_RECURSOS',
+              label: 'Cantidad de Recursos',
+              inputType: 'number',
+              placeholder: '1',
+            },
+            {
+              name: 'ID_CONDICION_ACCESO',
+              label: 'Condición de Acceso',
+              inputType: 'select',
+              options: [
+                { value: null, label: 'Sin especificar' },
+                ...condicionesAcceso.map((c) => ({
+                  value: c.ID_CONDICION,
+                  label: `${c.CODIGO} - ${c.NOMBRE}`,
+                })),
+              ],
+              encode: (v) => (v === null || v === undefined ? '__null__' : String(v)),
+              decode: (s) => (s === '__null__' ? null : Number(s)),
+            },
+            {
+              name: 'ID_DISCIPLINA_TAREA',
+              label: 'Disciplina de la Tarea',
+              inputType: 'select',
+              options: [
+                { value: null, label: 'Sin especificar' },
+                ...disciplinasTarea.map((d) => ({
+                  value: d.ID_DISCIPLINA_TAREA,
+                  label: `${d.CODIGO} - ${d.NOMBRE}`,
+                })),
+              ],
+              encode: (v) => (v === null || v === undefined ? '__null__' : String(v)),
+              decode: (s) => (s === '__null__' ? null : Number(s)),
             },
           ],
           onSubmit: handleCreate,

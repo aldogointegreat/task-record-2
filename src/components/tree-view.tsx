@@ -12,7 +12,7 @@ const treeVariants = cva(
 )
 
 const selectedTreeVariants = cva(
-    'before:opacity-100 before:bg-accent/70 text-accent-foreground'
+    'before:opacity-100 before:bg-primary/15 text-primary font-medium border-l-2 border-primary pl-1.5 bg-primary/4'
 )
 
 const dragOverVariants = cva(
@@ -352,7 +352,7 @@ const TreeNode = ({
                                 isOpen={isExpanded}
                                 default={defaultNodeIcon}
                             />
-                            <span className="text-sm truncate flex-1">
+                            <span className="text-sm truncate flex-1 opacity-80">
                               {typeof item.name === 'string' ? item.name : item.name}
                             </span>
                         </div>
@@ -463,7 +463,7 @@ const TreeLeaf = React.forwardRef<
                     isSelected={selectedItemId === item.id}
                     default={defaultLeafIcon}
                 />
-                <span className="grow text-sm truncate">
+                <span className="grow text-sm truncate opacity-80">
                   {typeof item.name === 'string' ? item.name : item.name}
                 </span>
                 <TreeActions isSelected={selectedItemId === item.id && !item.disabled}>
