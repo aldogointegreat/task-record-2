@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, Users, BookOpen, Shield, Layers, Tag, Package, Network, ListChecks, FolderTree } from 'lucide-react';
+import { ArrowRight, Users, BookOpen, Shield, Layers, Tag, Package, Network, ListChecks, FolderTree, ClipboardList } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -72,6 +72,14 @@ export default function Home() {
                   href: '/usuarios',
                   color: 'bg-green-500/10 text-green-500 border-green-500/20',
                   hoverColor: 'hover:bg-green-500/20',
+                },
+                {
+                  title: 'Disciplinas de Nivel',
+                  description: 'Catálogo de disciplinas para niveles jerárquicos',
+                  icon: ClipboardList,
+                  href: '/disciplina-nivel',
+                  color: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+                  hoverColor: 'hover:bg-rose-500/20',
                 },
                 {
                   title: 'Niveles',

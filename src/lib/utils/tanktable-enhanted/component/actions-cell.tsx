@@ -42,13 +42,34 @@ const inputRegistry: Record<
       onChange={(e) => onChange(Number(e.target.value) as any)}
     />
   ),
-  checkbox: ({ value, onChange }) => (
-    <input
-      type="checkbox"
-      checked={Boolean(value)}
-      onChange={(e) => onChange(e.target.checked as any)}
-    />
-  ),
+  checkbox: ({ value, onChange, meta }) => {
+    // Lógica especial para PLANTILLA y GENERICO: se deshabilitan mutuamente
+    const fieldName = meta?.fieldName as string | undefined;
+    const formData = meta?.formData as Record<string, unknown> | undefined;
+    const isPlantilla = fieldName === "PLANTILLA";
+    const isGenerico = fieldName === "GENERICO";
+    const otherFieldName = isPlantilla ? "GENERICO" : isGenerico ? "PLANTILLA" : null;
+    const otherFieldValue = otherFieldName && formData ? Boolean(formData[otherFieldName]) : false;
+    const isDisabled = (isPlantilla || isGenerico) && otherFieldValue;
+    const updateOtherField = meta?.updateField as ((field: string, value: unknown) => void) | undefined;
+    
+    return (
+      <input
+        type="checkbox"
+        checked={Boolean(value)}
+        disabled={isDisabled}
+        onChange={(e) => {
+          const newValue = e.target.checked;
+          onChange(newValue as any);
+          // Si se marca uno, desmarcar el otro automáticamente
+          if ((isPlantilla || isGenerico) && newValue && otherFieldName && updateOtherField) {
+            updateOtherField(otherFieldName, false);
+          }
+        }}
+        style={isDisabled ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+      />
+    );
+  },
   select: ({ value, onChange, meta }) => (
     (() => {
       const options = (meta?.options as { value: unknown; label: string }[]) ?? [];
@@ -191,12 +212,24 @@ export function EditableCell<T, K extends keyof T>({
     inputType
   ] as (typeof inputRegistry)[InputKind];
 
+  // Para checkboxes, pasar información adicional en meta
+  const enhancedMeta = inputType === "checkbox" && formData
+    ? {
+        ...meta,
+        fieldName: field as string,
+        formData,
+        updateField: (fieldName: string, value: unknown) => {
+          updateField(fieldName as keyof T, value as T[keyof T]);
+        },
+      }
+    : meta;
+
   return (
     <div className={className}>
       <Renderer
         value={formData?.[field] as T[K]}
         onChange={(v) => updateField(field, v)}
-        meta={meta}
+        meta={enhancedMeta}
       />
     </div>
   );

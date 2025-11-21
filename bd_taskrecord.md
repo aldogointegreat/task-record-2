@@ -83,6 +83,8 @@ CREATE TABLE [NIVEL] (
  [COMENTARIO] VARCHAR(MAX) NULL,
  [ID_USR] INTEGER NULL,
  [FECHA_CREACION] DATETIME NULL,
+[ID_DISCIPLINA_NIVEL] INTEGER NULL,
+[UNIDAD_MANTENIBLE] BIT NOT NULL DEFAULT 0,
  PRIMARY KEY([IDN])
 );
 GO
@@ -100,7 +102,21 @@ CREATE TABLE [ACTIVIDAD_NIVEL] (
  [IDT] INTEGER,
  [ORDEN] INTEGER NOT NULL,
  [DESCRIPCION] VARCHAR(255) NOT NULL,
- PRIMARY KEY([IDA])
+ [FUNCIONALIDAD] VARCHAR(MAX),
+ [MODO_FALLA] VARCHAR(MAX),
+ [EFECTO_FALLA] VARCHAR(MAX),
+ [TIEMPO_PROMEDIO_FALLA] DECIMAL(10,2),
+ [UNIDAD_TIEMPO_FALLA] VARCHAR(20),
+ [ID_CONSECUENCIA_FALLA] INTEGER,
+ [ID_CLASE_MANTENCION] INTEGER,
+ [TAREA_MANTENCION] VARCHAR(MAX),
+ [FRECUENCIA_TAREA] DECIMAL(10,2),
+ [UNIDAD_FRECUENCIA] VARCHAR(20),
+ [DURACION_TAREA] DECIMAL(10,2),
+ [CANTIDAD_RECURSOS] INTEGER,
+ [ID_CONDICION_ACCESO] INTEGER,
+ [ID_DISCIPLINA_TAREA] INTEGER,
+     PRIMARY KEY([IDA])
 );
 GO
 
@@ -109,6 +125,46 @@ CREATE TABLE [ATRIBUTO_VALOR] (
  [IDA] INTEGER NOT NULL,
  [VALOR] VARCHAR(255) NOT NULL,
  PRIMARY KEY([IDAV])
+);
+GO
+
+CREATE TABLE [CONSECUENCIA_FALLA] (
+ [ID_CONSECUENCIA] INTEGER NOT NULL IDENTITY(1,1),
+ [CODIGO] VARCHAR(10) NOT NULL,
+ [NOMBRE] VARCHAR(255) NOT NULL,
+ PRIMARY KEY([ID_CONSECUENCIA])
+);
+GO
+
+CREATE TABLE [CLASE_MANTENCION] (
+ [ID_CLASE] INTEGER NOT NULL IDENTITY(1,1),
+ [CODIGO] VARCHAR(10) NOT NULL,
+ [NOMBRE] VARCHAR(255) NOT NULL,
+ PRIMARY KEY([ID_CLASE])
+);
+GO
+
+CREATE TABLE [CONDICION_ACCESO] (
+ [ID_CONDICION] INTEGER NOT NULL IDENTITY(1,1),
+ [CODIGO] VARCHAR(10) NOT NULL,
+ [NOMBRE] VARCHAR(255) NOT NULL,
+ PRIMARY KEY([ID_CONDICION])
+);
+GO
+
+CREATE TABLE [DISCIPLINA_TAREA] (
+ [ID_DISCIPLINA_TAREA] INTEGER NOT NULL IDENTITY(1,1),
+ [CODIGO] VARCHAR(20) NOT NULL,
+ [NOMBRE] VARCHAR(255) NOT NULL,
+ PRIMARY KEY([ID_DISCIPLINA_TAREA])
+);
+GO
+
+CREATE TABLE [DISCIPLINA_NIVEL] (
+[ID_DISCIPLINA_NIVEL] INTEGER NOT NULL IDENTITY(1,1),
+[CODIGO] VARCHAR(10) NOT NULL,
+[DESCRIPCION] VARCHAR(255) NOT NULL,
+PRIMARY KEY([ID_DISCIPLINA_NIVEL])
 );
 GO
 
@@ -348,6 +404,37 @@ REFERENCES [ACTIVIDAD_NIVEL]([IDA])
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 GO
 
+-- ACTIVIDAD_NIVEL - Nuevas relaciones con catálogos
+ALTER TABLE [ACTIVIDAD_NIVEL]
+ADD FOREIGN KEY([ID_CONSECUENCIA_FALLA])
+REFERENCES [CONSECUENCIA_FALLA]([ID_CONSECUENCIA])
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+GO
+
+ALTER TABLE [ACTIVIDAD_NIVEL]
+ADD FOREIGN KEY([ID_CLASE_MANTENCION])
+REFERENCES [CLASE_MANTENCION]([ID_CLASE])
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+GO
+
+ALTER TABLE [ACTIVIDAD_NIVEL]
+ADD FOREIGN KEY([ID_CONDICION_ACCESO])
+REFERENCES [CONDICION_ACCESO]([ID_CONDICION])
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+GO
+
+ALTER TABLE [ACTIVIDAD_NIVEL]
+ADD FOREIGN KEY([ID_DISCIPLINA_TAREA])
+REFERENCES [DISCIPLINA_TAREA]([ID_DISCIPLINA_TAREA])
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+GO
+
+ALTER TABLE [NIVEL]
+ADD FOREIGN KEY([ID_DISCIPLINA_NIVEL])
+REFERENCES [DISCIPLINA_NIVEL]([ID_DISCIPLINA_NIVEL])
+ON UPDATE NO ACTION ON DELETE NO ACTION;
+GO
+
 -- =============================================
 -- CHECK CONSTRAINTS
 -- =============================================
@@ -434,6 +521,26 @@ CREATE UNIQUE INDEX UX_JERARQUIA_DESCRIPCION
 ON [JERARQUIA]([DESCRIPCION]);
 GO
 
+CREATE UNIQUE INDEX UX_CONSECUENCIA_FALLA_CODIGO
+ON [CONSECUENCIA_FALLA]([CODIGO]);
+GO
+
+CREATE UNIQUE INDEX UX_CLASE_MANTENCION_CODIGO
+ON [CLASE_MANTENCION]([CODIGO]);
+GO
+
+CREATE UNIQUE INDEX UX_CONDICION_ACCESO_CODIGO
+ON [CONDICION_ACCESO]([CODIGO]);
+GO
+
+CREATE UNIQUE INDEX UX_DISCIPLINA_TAREA_CODIGO
+ON [DISCIPLINA_TAREA]([CODIGO]);
+GO
+
+CREATE UNIQUE INDEX UX_DISCIPLINA_NIVEL_CODIGO
+ON [DISCIPLINA_NIVEL]([CODIGO]);
+GO
+
 -- =============================================
 -- ÍNDICES DE RENDIMIENTO
 -- =============================================
@@ -461,5 +568,130 @@ GO
 
 PRINT 'Schema creado exitosamente';
 PRINT 'ADVERTENCIA: Tabla ACTIVIDAD no tiene relaciones definidas';
-GOT
+GO
+
+-- =============================================
+-- DATOS SINTÉTICOS - CATÁLOGOS DE MANTENCIÓN
+-- =============================================
+
+-- Consecuencia de Falla
+INSERT INTO [CONSECUENCIA_FALLA] ([CODIGO], [NOMBRE]) VALUES
+('E', 'Consecuencia al medio ambiente'),
+('H', 'Consecuencia Escondida'),
+('N', 'Consecuencia NO Operacional'),
+('O', 'Consecuencia Operacional'),
+('S', 'Consecuencia de Seguridad Personal');
+GO
+
+-- Clase de Mantención
+INSERT INTO [CLASE_MANTENCION] ([CODIGO], [NOMBRE]) VALUES
+('OHF', 'Operar hasta la Falla'),
+('PDM', 'Tareas de mantención predictiva'),
+('REEM', 'Tareas de Reemplazo Programadas'),
+('REST', 'Tareas de Restauraciones Programadas'),
+('TAREA', 'Tarea de Frecuencia Fija');
+GO
+
+-- Condición de Acceso
+INSERT INTO [CONDICION_ACCESO] ([CODIGO], [NOMBRE]) VALUES
+('ED', 'Equipo Detenido'),
+('EF', 'Equipo en Marcha');
+GO
+
+-- Disciplina de Tarea
+INSERT INTO [DISCIPLINA_TAREA] ([CODIGO], [NOMBRE]) VALUES
+('ANA_ACTE', 'Analista en Aceite'),
+('ANA_TERM', 'Analista en Termografía'),
+('ANA_VIBR', 'Analista en Vibración'),
+('C_CAB_M', 'Mecánico Contratista Cabina/Aire AC'),
+('C_ELE_EL', 'Eléctrico Equipo Liviano Contratista'),
+('C_MEC_EL', 'Mecánico Equipo Liviano Contratista'),
+('C_MEC_FL', 'Mecánico Contratista Finning Camiones'),
+('C_MECA_M', 'Mecánico Mina Contratista'),
+('CON_EXT', 'CONTRATISTA EXTINTORES'),
+('ELE_CAMI', 'Eléctrico de Camiones'),
+('ELE_MANT', 'Eléctrico de Mantención Camiones'),
+('ELE_PLPER', 'Eléctrico Palas-Perfo'),
+('ELEC', 'Eléctrico - Planta'),
+('ELEC_PDM', 'Predictivo Eléctrico - Planta'),
+('ELIN_HUM', 'Elec-Inst A. Humeda'),
+('ELIN_SEC', 'Elec-Inst A. Seca'),
+('INST', 'Instrumentación - Planta'),
+('LUB_CHANC', 'Lubricador Chancado'),
+('LUB_SX', 'Lubricador SX'),
+('LUB_TERR', 'Lubricador de palas y perforadoras'),
+('MEC_CAMI', 'Mecanico Camiones'),
+('MEC_CHANC', 'Mecánico Chancado'),
+('MEC_MANT', 'Mecánico Mantención'),
+('MEC_MOTO', 'Mecánico Motores'),
+('MEC_PLPER', 'Mecánico Palas-Perfo'),
+('MEC_SERV', 'Mecanico Servicio'),
+('MEC_SX', 'Mecánico SX'),
+('MEC_TERR', 'Mecánico de Terreno Camiones'),
+('OO_CC', 'Obras Civiles'),
+('OP_APIL', 'Operaciones Apilado'),
+('OP_CHANC', 'Operaciones Chancado'),
+('OP_RO', 'Operaciones Osmosis'),
+('OP_SX', 'Operaciones SX'),
+('OPE_PLPER', 'Operaciones Palas-Perfo'),
+('PDM_MEC', 'Predictivo Mecánico'),
+('SOL_CAMI', 'Soldador Camiones'),
+('SOL_PALA', 'Soldador Palas y perforadoras');
+GO
+
+-- Disciplina de Niveles
+INSERT INTO [DISCIPLINA_NIVEL] ([CODIGO], [DESCRIPCION]) VALUES
+('E', 'Eléctrico'),
+('G', 'General'),
+('I', 'Instrumentación'),
+('M', 'Mecánico');
+GO
+
+-- =============================================
+-- DATOS SINTÉTICOS - EJEMPLOS DE ACTIVIDAD_NIVEL CON CAMPOS EXTENDIDOS
+-- =============================================
+
+-- Nota: Estos son ejemplos sintéticos. Necesitarás crear niveles e IDN válidos primero.
+-- Ejemplo de INSERT con todos los campos nuevos:
+/*
+INSERT INTO [ACTIVIDAD_NIVEL] (
+    [IDN], [IDT], [ORDEN], [DESCRIPCION],
+    [FUNCIONALIDAD], [MODO_FALLA], [EFECTO_FALLA],
+    [TIEMPO_PROMEDIO_FALLA], [UNIDAD_TIEMPO_FALLA],
+    [ID_CONSECUENCIA_FALLA], [ID_CLASE_MANTENCION],
+    [TAREA_MANTENCION], [FRECUENCIA_TAREA], [UNIDAD_FRECUENCIA],
+    [DURACION_TAREA], [CANTIDAD_RECURSOS],
+    [ID_CONDICION_ACCESO], [ID_DISCIPLINA_TAREA]
+) VALUES (
+    1, -- IDN (debe existir un nivel con ID 1)
+    NULL, -- IDT
+    1, -- ORDEN
+    'Inspección de Acoplamiento',
+    'El acoplamiento tiene como función principal: Transmitir el torque desde el motor hacia el equipo impulsado (bomba, reductor, ventilador, etc.).',
+    'Si el acoplamiento no recibe inspección o mantenimiento periódico, pueden ocurrir modos de falla como: Desgaste excesivo de elementos flexibles (gomas, insertos, arañas).',
+    'Los efectos típicos de estos modos de falla incluyen: Aumento de vibraciones en el sistema de accionamiento. Pérdida parcial o total de la transmisión de torque, provocando detención del equipo.',
+    10, -- Tiempo promedio entre falla
+    'Semanas',
+    (SELECT ID_CONSECUENCIA FROM CONSECUENCIA_FALLA WHERE CODIGO = 'O'), -- Consecuencia Operacional
+    (SELECT ID_CLASE FROM CLASE_MANTENCION WHERE CODIGO = 'TAREA'), -- Tarea de Frecuencia Fija
+    'REVISAR ACOPLAMIENTO, DETERMINAR SI HAY RUIDO ANORMAL, VIBRACIÓN Y TEMPERATURAS ELEVADAS.',
+    1, -- Frecuencia
+    'Semanas',
+    5, -- Duración en minutos
+    1, -- Cantidad de recursos
+    (SELECT ID_CONDICION FROM CONDICION_ACCESO WHERE CODIGO = 'EF'), -- Equipo en Marcha
+    (SELECT ID_DISCIPLINA_TAREA FROM DISCIPLINA_TAREA WHERE CODIGO = 'MEC_CHANC') -- Mecánico Chancado
+);
+*/
+
+-- =============================================
+-- NOTAS SOBRE UNIDADES DE TIEMPO
+-- =============================================
+-- Las unidades de tiempo se manejan como texto para mayor flexibilidad.
+-- Valores recomendados para UNIDAD_TIEMPO_FALLA y UNIDAD_FRECUENCIA:
+--   'Segundos', 'Minutos', 'Horas', 'Días', 'Semanas', 'Meses', 'Años'
+-- La conversión y cálculos se harán en la capa de aplicación según sea necesario.
+
+PRINT 'Datos sintéticos insertados exitosamente';
+GO
 ```

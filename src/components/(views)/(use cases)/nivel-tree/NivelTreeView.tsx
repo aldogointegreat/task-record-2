@@ -4,8 +4,28 @@ import { useState, useEffect } from 'react';
 import { TreeView, TreeDataItem } from '@/components/tree-view';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { getAllJerarquias, getAllNiveles, getAllActividadNiveles, getAllAtributos } from '@/lib/api';
-import type { Jerarquia, Nivel, ActividadNivel, Atributo } from '@/models';
+import { 
+  getAllJerarquias, 
+  getAllNiveles, 
+  getAllActividadNiveles, 
+  getAllAtributos,
+  getAllConsecuenciasFalla,
+  getAllClasesMantencion,
+  getAllCondicionesAcceso,
+  getAllDisciplinasTarea,
+  getAllDisciplinasNivel
+} from '@/lib/api';
+import type { 
+  Jerarquia, 
+  Nivel, 
+  ActividadNivel, 
+  Atributo,
+  ConsecuenciaFalla,
+  ClaseMantencion,
+  CondicionAcceso,
+  DisciplinaTarea,
+  DisciplinaNivel
+} from '@/models';
 import { buildNivelTree } from '@/lib/utils/build-nivel-tree';
 import { NivelDetailsPanel } from './NivelDetailsPanel';
 import { ActividadNivelDetailsPanel } from './ActividadNivelDetailsPanel';
@@ -18,6 +38,11 @@ export function NivelTreeView() {
   const [niveles, setNiveles] = useState<Nivel[]>([]);
   const [actividadesNivel, setActividadesNivel] = useState<ActividadNivel[]>([]);
   const [atributos, setAtributos] = useState<Atributo[]>([]);
+  const [consecuenciasFalla, setConsecuenciasFalla] = useState<ConsecuenciaFalla[]>([]);
+  const [clasesMantencion, setClasesMantencion] = useState<ClaseMantencion[]>([]);
+  const [condicionesAcceso, setCondicionesAcceso] = useState<CondicionAcceso[]>([]);
+  const [disciplinasTarea, setDisciplinasTarea] = useState<DisciplinaTarea[]>([]);
+  const [disciplinasNivel, setDisciplinasNivel] = useState<DisciplinaNivel[]>([]);
   const [treeData, setTreeData] = useState<TreeDataItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<TreeDataItem | undefined>(undefined);
   const [loading, setLoading] = useState(true);
@@ -46,11 +71,26 @@ export function NivelTreeView() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [jerarquiasResult, nivelesResult, actividadesResult, atributosResult] = await Promise.all([
+      const [
+        jerarquiasResult, 
+        nivelesResult, 
+        actividadesResult, 
+        atributosResult,
+        consecuenciasResult,
+        clasesResult,
+        condicionesResult,
+        disciplinasResult,
+        disciplinasNivelResult
+      ] = await Promise.all([
         getAllJerarquias(),
         getAllNiveles(),
         getAllActividadNiveles(),
         getAllAtributos(),
+        getAllConsecuenciasFalla(),
+        getAllClasesMantencion(),
+        getAllCondicionesAcceso(),
+        getAllDisciplinasTarea(),
+        getAllDisciplinasNivel(),
       ]);
 
       if (jerarquiasResult.success && jerarquiasResult.data) {
@@ -73,6 +113,26 @@ export function NivelTreeView() {
         setAtributos(atributosResult.data);
       }
 
+      if (consecuenciasResult.success && consecuenciasResult.data) {
+        setConsecuenciasFalla(consecuenciasResult.data);
+      }
+
+      if (clasesResult.success && clasesResult.data) {
+        setClasesMantencion(clasesResult.data);
+      }
+
+      if (condicionesResult.success && condicionesResult.data) {
+        setCondicionesAcceso(condicionesResult.data);
+      }
+
+      if (disciplinasResult.success && disciplinasResult.data) {
+        setDisciplinasTarea(disciplinasResult.data);
+      }
+
+      if (disciplinasNivelResult.success && disciplinasNivelResult.data) {
+        setDisciplinasNivel(disciplinasNivelResult.data);
+      }
+
       // Construir el árbol si los datos principales están disponibles
       if (jerarquiasResult.success && nivelesResult.success && 
           jerarquiasResult.data && nivelesResult.data) {
@@ -90,6 +150,47 @@ export function NivelTreeView() {
       toast.error('Error al cargar los datos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleActividadUpdate = (updatedActividad: ActividadNivel) => {
+    // Actualizar la actividad en el estado local
+    setActividadesNivel(prev => {
+      const updated = prev.map(act => act.IDA === updatedActividad.IDA ? updatedActividad : act);
+      
+      // Reconstruir el árbol con los datos actualizados
+      if (jerarquias.length > 0 && niveles.length > 0) {
+        const tree = buildNivelTree(
+          jerarquias,
+          niveles,
+          updated,
+          showActividades,
+          showJerarquia
+        );
+        setTreeData(tree);
+      }
+      
+      return updated;
+    });
+    
+    // Actualizar el selectedItem si es la actividad seleccionada
+    if (selectedItem?.metadata && 
+        typeof selectedItem.metadata === 'object' && 
+        'entity' in selectedItem.metadata && 
+        selectedItem.metadata.entity === 'actividad-nivel' &&
+        'data' in selectedItem.metadata) {
+      const currentActividad = selectedItem.metadata.data as ActividadNivel;
+      if (currentActividad.IDA === updatedActividad.IDA) {
+        // Actualizar el metadata del selectedItem
+        const updatedItem: TreeDataItem = {
+          ...selectedItem,
+          metadata: {
+            ...selectedItem.metadata,
+            data: updatedActividad
+          }
+        };
+        setSelectedItem(updatedItem);
+      }
     }
   };
 
@@ -157,51 +258,59 @@ export function NivelTreeView() {
   };
 
   const handleNivelesChange = async () => {
-    // Recargar los niveles en segundo plano sin refrescar completamente
+    // Recargar los niveles Y actividades en segundo plano sin refrescar completamente
     try {
-      const nivelesResult = await getAllNiveles();
+      const [nivelesResult, actividadesResult] = await Promise.all([
+        getAllNiveles(),
+        getAllActividadNiveles()
+      ]);
+      
       if (nivelesResult.success && nivelesResult.data) {
         setNiveles(nivelesResult.data);
+      }
+      
+      if (actividadesResult.success && actividadesResult.data) {
+        setActividadesNivel(actividadesResult.data);
+      }
         
-        // Reconstruir el árbol con los nuevos datos
-        if (jerarquias.length > 0) {
-          const tree = buildNivelTree(
-            jerarquias,
-            nivelesResult.data,
-            actividadesNivel.length > 0 ? actividadesNivel : undefined,
-            showActividades,
-            showJerarquia
-          );
-          setTreeData(tree);
+      // Reconstruir el árbol con los nuevos datos
+      if (jerarquias.length > 0 && nivelesResult.success && nivelesResult.data) {
+        const tree = buildNivelTree(
+          jerarquias,
+          nivelesResult.data,
+          actividadesResult.success && actividadesResult.data ? actividadesResult.data : undefined,
+          showActividades,
+          showJerarquia
+        );
+        setTreeData(tree);
+        
+        // Si hay un nivel seleccionado, actualizarlo con los datos frescos
+        if (selectedItem?.metadata && 
+            typeof selectedItem.metadata === 'object' && 
+            'entity' in selectedItem.metadata && 
+            selectedItem.metadata.entity === 'nivel' &&
+            'data' in selectedItem.metadata) {
+          const currentNivelId = (selectedItem.metadata.data as Nivel).IDN;
+          const updatedNivel = nivelesResult.data.find(n => n.IDN === currentNivelId);
           
-          // Si hay un nivel seleccionado, actualizarlo con los datos frescos
-          if (selectedItem?.metadata && 
-              typeof selectedItem.metadata === 'object' && 
-              'entity' in selectedItem.metadata && 
-              selectedItem.metadata.entity === 'nivel' &&
-              'data' in selectedItem.metadata) {
-            const currentNivelId = (selectedItem.metadata.data as Nivel).IDN;
-            const updatedNivel = nivelesResult.data.find(n => n.IDN === currentNivelId);
-            
-            if (updatedNivel) {
-              // Encontrar el item actualizado en el nuevo árbol
-              const findUpdatedItem = (items: TreeDataItem[]): TreeDataItem | null => {
-                for (const item of items) {
-                  if (item.id === `nivel-${currentNivelId}`) {
-                    return item;
-                  }
-                  if (item.children) {
-                    const found = findUpdatedItem(item.children);
-                    if (found) return found;
-                  }
+          if (updatedNivel) {
+            // Encontrar el item actualizado en el nuevo árbol
+            const findUpdatedItem = (items: TreeDataItem[]): TreeDataItem | null => {
+              for (const item of items) {
+                if (item.id === `nivel-${currentNivelId}`) {
+                  return item;
                 }
-                return null;
-              };
-              
-              const updatedItem = findUpdatedItem(tree);
-              if (updatedItem) {
-                setSelectedItem(updatedItem);
+                if (item.children) {
+                  const found = findUpdatedItem(item.children);
+                  if (found) return found;
+                }
               }
+              return null;
+            };
+            
+            const updatedItem = findUpdatedItem(tree);
+            if (updatedItem) {
+              setSelectedItem(updatedItem);
             }
           }
         }
@@ -241,10 +350,10 @@ export function NivelTreeView() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg">Jerarquía de Niveles</CardTitle>
-                <CardDescription className="text-xs">
-                  Estructura jerárquica del sistema
-                </CardDescription>
+            <CardTitle className="text-lg">Jerarquía de Niveles</CardTitle>
+            <CardDescription className="text-xs">
+              Estructura jerárquica del sistema
+            </CardDescription>
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex flex-col items-center gap-1">
@@ -323,6 +432,7 @@ export function NivelTreeView() {
                 niveles={niveles}
                 actividadesNivel={actividadesNivel}
                 atributos={atributos}
+                disciplinasNivel={disciplinasNivel}
                 onActividadesChange={handleActividadesChange}
                 onNivelesChange={handleNivelesChange}
               />
@@ -330,6 +440,13 @@ export function NivelTreeView() {
               <ActividadNivelDetailsPanel 
                 actividad={selectedActividad}
                 atributos={atributos}
+                consecuenciasFalla={consecuenciasFalla}
+                clasesMantencion={clasesMantencion}
+                condicionesAcceso={condicionesAcceso}
+                disciplinasTarea={disciplinasTarea}
+                niveles={niveles}
+                onActividadChange={handleActividadUpdate}
+                onActividadesChange={handleActividadesChange}
               />
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -377,4 +494,3 @@ export function NivelTreeView() {
     </>
   );
 }
-

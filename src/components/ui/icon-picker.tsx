@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +17,7 @@ import { APP_ICONS, getIconList } from "@/lib/constants/app-icons";
 
 interface IconPickerProps {
   value?: string;
-  onChange: (value: string) => void;
+  onChange: (value: string | undefined) => void;
   placeholder?: string;
   className?: string;
 }
@@ -54,22 +54,37 @@ export function IconPicker({
       }}
     >
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className={cn("w-full justify-between", className)}
-        >
-          {selectedIcon ? (
-            <div className="flex items-center gap-2">
-              <selectedIcon.component className="h-4 w-4" />
-              <span>{selectedIcon.label}</span>
-            </div>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className={cn("flex-1 justify-between", className)}
+          >
+            {selectedIcon ? (
+              <div className="flex items-center gap-2">
+                <selectedIcon.component className="h-4 w-4" />
+                <span>{selectedIcon.label}</span>
+              </div>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+          {value && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange(undefined);
+              }}
+              title="Quitar icono"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        </div>
       </PopoverTrigger>
       <PopoverContent 
         className="w-[300px] p-0 z-[100]" 
@@ -95,6 +110,38 @@ export function IconPicker({
             ) : (
               <CommandGroup>
                 <div className="grid grid-cols-4 gap-2 p-2">
+                  {/* Opción "Sin icono" */}
+                  <div
+                    onClick={() => {
+                      onChange(undefined);
+                      setOpen(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onChange(undefined);
+                        setOpen(false);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    className={cn(
+                      "relative flex flex-col items-center justify-center gap-1 p-2 rounded-md cursor-pointer h-auto transition-colors hover:bg-accent hover:text-accent-foreground",
+                      !value ? "bg-accent text-accent-foreground" : ""
+                    )}
+                  >
+                    <div className="h-6 w-6 flex items-center justify-center border border-dashed border-muted-foreground/30 rounded">
+                      <X className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                    <span className="text-[10px] text-center leading-tight w-full truncate">
+                      Sin icono
+                    </span>
+                    {!value && (
+                      <div className="absolute top-1 right-1">
+                        <Check className="h-3 w-3" />
+                      </div>
+                    )}
+                  </div>
                   {icons.map((icon) => (
                   <div
                     key={icon.name}

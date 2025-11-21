@@ -89,16 +89,34 @@ export function buildNivelTree(
         allChildren.push(...actividades);
       }
       
-      // Obtener el ícono del nivel o usar el ícono por defecto
-      const CustomIcon = nivel.ICONO ? getIconComponent(nivel.ICONO) : null;
-      const hasAnyChildren = hasNivelChildren || (showActividades && actividades.length > 0);
-      const defaultIcon = hasAnyChildren ? Folder : Circle;
+      // Obtener el ícono del nivel - si no hay icono personalizado, usar Folder por defecto
+      const hasIcono = nivel.ICONO && nivel.ICONO.trim() !== '';
+      const CustomIcon = hasIcono ? getIconComponent(nivel.ICONO!) : null;
+      const defaultIcon = Folder; // Icono por defecto para niveles sin icono personalizado
+      
+      // Determinar si es plantilla o genérico para aplicar estilos especiales
+      const esPlantilla = nivel.PLANTILLA === true;
+      const esGenerico = nivel.GENERICO === true;
+      const tieneEstiloEspecial = esPlantilla || esGenerico;
       
       return {
         id: `nivel-${nivel.IDN}`,
         name: (
           <span className="flex items-center gap-2 w-full">
-            <span className="flex-1 truncate">{nivel.NOMBRE}</span>
+            <span className={`flex-1 truncate ${tieneEstiloEspecial ? 'font-bold text-white' : ''}`}>
+              {nivel.NOMBRE}
+            </span>
+            {/* Badge para PLANTILLA o GENERICO */}
+            {esPlantilla && (
+              <span className="text-xs font-bold shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30">
+                PLANTILLA
+              </span>
+            )}
+            {esGenerico && (
+              <span className="text-xs font-bold shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                GENERICO
+              </span>
+            )}
             {showJerarquia && jerarquiaNombre && (
               <span 
                 className="text-xs font-normal shrink-0 flex items-center gap-1.5 px-1.5 py-0.5 rounded-full bg-muted/50"
@@ -120,7 +138,7 @@ export function buildNivelTree(
           </span>
         ),
         icon: CustomIcon || defaultIcon,
-        openIcon: CustomIcon || Folder,
+        openIcon: CustomIcon || defaultIcon,
         metadata: {
           type: 'Nivel',
           entity: 'nivel',

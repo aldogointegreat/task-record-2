@@ -7,15 +7,17 @@ import {
   createNivel, 
   updateNivel, 
   deleteNivel,
-  getAllJerarquias
+  getAllJerarquias,
+  getAllDisciplinasNivel
 } from '@/lib/api';
-import type { Nivel, CreateNivelDTO, UpdateNivelDTO, Jerarquia } from '@/models';
+import type { Nivel, CreateNivelDTO, UpdateNivelDTO, Jerarquia, DisciplinaNivel } from '@/models';
 import { createNivelColumns } from './nivel-columns';
 import { toast } from 'sonner';
 
 export function NivelList() {
   const [niveles, setNiveles] = useState<Nivel[]>([]);
   const [jerarquias, setJerarquias] = useState<Jerarquia[]>([]);
+  const [disciplinasNivel, setDisciplinasNivel] = useState<DisciplinaNivel[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingIds, setUpdatingIds] = useState<Set<number>>(new Set());
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
@@ -28,9 +30,10 @@ export function NivelList() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [nivelesResult, jerarquiasResult] = await Promise.all([
+      const [nivelesResult, jerarquiasResult, disciplinasNivelResult] = await Promise.all([
         getAllNiveles(),
         getAllJerarquias(),
+        getAllDisciplinasNivel(),
       ]);
 
       if (nivelesResult.success && nivelesResult.data) {
@@ -38,6 +41,9 @@ export function NivelList() {
       }
       if (jerarquiasResult.success && jerarquiasResult.data) {
         setJerarquias(jerarquiasResult.data);
+      }
+      if (disciplinasNivelResult.success && disciplinasNivelResult.data) {
+        setDisciplinasNivel(disciplinasNivelResult.data);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -50,6 +56,12 @@ export function NivelList() {
   const handleCreate = async (data: Nivel) => {
     try {
       setCreating(true);
+      // Validación: Si es plantilla, no puede ser genérico
+      if (data.PLANTILLA && data.GENERICO) {
+        toast.error('Un nivel plantilla no puede ser genérico');
+        throw new Error('Un nivel plantilla no puede ser genérico');
+      }
+      
       const createData: CreateNivelDTO = {
         IDJ: data.IDJ,
         IDNP: data.IDNP ?? null,
@@ -57,9 +69,11 @@ export function NivelList() {
         PLANTILLA: data.PLANTILLA ?? false,
         NROPM: data.NROPM ?? 0,
         ICONO: data.ICONO,
-        GENERADO: data.GENERADO ?? false,
+        GENERICO: data.PLANTILLA ? false : (data.GENERICO ?? false), // Si es plantilla, forzar a false
         COMENTARIO: data.COMENTARIO,
         ID_USR: data.ID_USR,
+        ID_DISCIPLINA_NIVEL: data.ID_DISCIPLINA_NIVEL ?? null,
+        UNIDAD_MANTENIBLE: data.UNIDAD_MANTENIBLE ?? false,
         // FECHA_CREACION usually auto-generated
       };
 
@@ -85,6 +99,12 @@ export function NivelList() {
   const handleUpdate = async (data: Nivel) => {
     try {
       setUpdatingIds((prev) => new Set(prev).add(data.IDN));
+      // Validación: Si es plantilla, no puede ser genérico
+      if (data.PLANTILLA && data.GENERICO) {
+        toast.error('Un nivel plantilla no puede ser genérico');
+        throw new Error('Un nivel plantilla no puede ser genérico');
+      }
+      
       const updateData: UpdateNivelDTO = {
         IDJ: data.IDJ,
         IDNP: data.IDNP ?? null,
@@ -92,9 +112,11 @@ export function NivelList() {
         PLANTILLA: data.PLANTILLA,
         NROPM: data.NROPM,
         ICONO: data.ICONO,
-        GENERADO: data.GENERADO,
+        GENERICO: data.PLANTILLA ? false : data.GENERICO, // Si es plantilla, forzar a false
         COMENTARIO: data.COMENTARIO,
         ID_USR: data.ID_USR,
+        ID_DISCIPLINA_NIVEL: data.ID_DISCIPLINA_NIVEL ?? null,
+        UNIDAD_MANTENIBLE: data.UNIDAD_MANTENIBLE,
       };
 
       const result = await updateNivel(data.IDN, updateData);
@@ -150,6 +172,7 @@ export function NivelList() {
   const columns = createNivelColumns({ 
     jerarquias,
     niveles,
+    disciplinasNivel,
     updatingIds,
     deletingIds,
   });
@@ -194,6 +217,21 @@ export function NivelList() {
               decode: (s) => Number(s),
             },
             {
+              name: 'ID_DISCIPLINA_NIVEL',
+              label: 'Disciplina',
+              inputType: 'select',
+              required: false,
+              options: [
+                { value: null, label: 'Sin disciplina' },
+                ...disciplinasNivel.map((disc) => ({
+                  value: disc.ID_DISCIPLINA_NIVEL,
+                  label: `${disc.CODIGO} - ${disc.DESCRIPCION}`,
+                })),
+              ],
+              encode: (v) => (v === null || v === undefined ? '__null__' : String(v)),
+              decode: (s) => (s === '__null__' ? null : Number(s)),
+            },
+            {
               name: 'IDNP',
               label: 'Nivel Padre',
               inputType: 'select',
@@ -213,8 +251,13 @@ export function NivelList() {
               inputType: 'checkbox',
             },
             {
-              name: 'GENERADO',
-              label: 'Generado',
+              name: 'GENERICO',
+              label: 'Genérico',
+              inputType: 'checkbox',
+            },
+            {
+              name: 'UNIDAD_MANTENIBLE',
+              label: 'Unidad Mantenible',
               inputType: 'checkbox',
             },
             {
