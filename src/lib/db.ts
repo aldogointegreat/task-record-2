@@ -13,7 +13,6 @@ const dbConfig: sql.config = {
     trustServerCertificate: true,
   },
 };
-
 // Pool de conexiones (singleton)
 let pool: sql.ConnectionPool | null = null;
 

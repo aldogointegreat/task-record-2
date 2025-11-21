@@ -12,4 +12,5 @@ export * from './(tables)/usuario/UsuarioList';
 export * from './(tables)/nivel/NivelList';
 export * from './(tables)/actividad-nivel/ActividadNivelList';
 export * from './(tables)/atributo-valor/AtributoValorList';
+export * from './(tables)/pauta/PMList';
 

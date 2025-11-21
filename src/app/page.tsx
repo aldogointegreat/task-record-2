@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, Users, BookOpen, Shield, Layers, Tag, Package, Network, ListChecks, FolderTree } from 'lucide-react';
+import { ArrowRight, Users, BookOpen, Shield, Layers, Tag, Package, Network, ListChecks, FolderTree, ClipboardList } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -179,6 +179,25 @@ export default function Home() {
                 <CardContent className="pt-0">
                   <CardDescription className="text-sm">
                     Vista jerárquica de niveles con gestión de actividades
+                  </CardDescription>
+                </CardContent>
+              </Card>
+              <Card
+                className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-teal-500/10 text-teal-500 border-teal-500/20 hover:bg-teal-500/20"
+                onClick={() => handleNavigation('/pautas')}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-teal-500/10">
+                      <ClipboardList className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-lg">Mantención de Pautas</CardTitle>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="text-sm">
+                    Gestión y mantención de pautas del sistema
                   </CardDescription>
                 </CardContent>
               </Card>

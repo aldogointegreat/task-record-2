@@ -12,4 +12,5 @@ export * from './usuario-api';
 export * from './nivel-api';
 export * from './actividad-nivel-api';
 export * from './atributo-valor-api';
+export * from './pm-api';
 

@@ -52,6 +52,12 @@ const navSections: NavSection[] = [
       { title: 'Actividad Nivel', href: '/actividad-nivel' },
     ],
   },
+  {
+    title: 'Otras Herramientas',
+    items: [
+      { title: 'Mantención de Pautas', href: '/pautas' },
+    ],
+  },
 ];
 
 export function Navbar() {
