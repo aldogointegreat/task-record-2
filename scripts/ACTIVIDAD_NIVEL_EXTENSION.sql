@@ -7,7 +7,7 @@
 -- Si no existe, usar el CREATE TABLE completo del bd_taskrecord.md
 -- =============================================
 
-USE [TU_BASE_DE_DATOS]; -- ⚠️ CAMBIAR POR EL NOMBRE DE TU BD
+USE [TASKRECORDS]; 
 GO
 
 -- =============================================
