@@ -133,14 +133,15 @@ export async function POST(request: NextRequest) {
 
     // Construir query
     const sqlQuery = `
-      INSERT INTO [PM] (IDN, NRO, CONJUNTO, PROGRAMACION, ESTADO, HOROMETRO, INICIO, FIN)
+      INSERT INTO [PM] (IDN, NRO, CONJUNTO, PLT, PROGRAMACION, ESTADO, HOROMETRO, INICIO, FIN)
       OUTPUT INSERTED.*
-      VALUES (@IDN, @NRO, @CONJUNTO, @PROGRAMACION, @ESTADO, @HOROMETRO, @INICIO, @FIN)`;
+      VALUES (@IDN, @NRO, @CONJUNTO, @PLT, @PROGRAMACION, @ESTADO, @HOROMETRO, @INICIO, @FIN)`;
 
     const params: Record<string, unknown> = {
       IDN: body.IDN,
       NRO: body.NRO,
       CONJUNTO: body.CONJUNTO,
+      PLT: body.PLT ?? null,
       PROGRAMACION: body.PROGRAMACION,
       ESTADO: body.ESTADO,
       HOROMETRO: body.HOROMETRO ?? 0,

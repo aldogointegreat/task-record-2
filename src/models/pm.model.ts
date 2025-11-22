@@ -8,6 +8,7 @@ export interface PM {
   IDN: number;
   NRO: number;
   CONJUNTO: number;
+  PLT: number | null;
   PROGRAMACION: Date | string;
   ESTADO: string;
   HOROMETRO: number;
@@ -19,6 +20,7 @@ export interface CreatePMDTO {
   IDN: number;
   NRO: number;
   CONJUNTO: number;
+  PLT?: number | null;
   PROGRAMACION: Date | string;
   ESTADO: string;
   HOROMETRO?: number;
@@ -30,6 +32,7 @@ export interface UpdatePMDTO {
   IDN?: number;
   NRO?: number;
   CONJUNTO?: number;
+  PLT?: number | null;
   PROGRAMACION?: Date | string;
   ESTADO?: string;
   HOROMETRO?: number;

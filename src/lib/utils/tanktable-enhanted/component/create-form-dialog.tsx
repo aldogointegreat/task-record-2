@@ -87,7 +87,7 @@ function FormFieldRenderer<TData extends object>({
           />
         </div>
       );
-    case "checkbox":
+    case "checkbox": {
       // Lógica especial para PLANTILLA y GENERICO: se deshabilitan mutuamente
       const isPlantilla = field.name === "PLANTILLA";
       const isGenerico = field.name === "GENERICO";
@@ -121,7 +121,15 @@ function FormFieldRenderer<TData extends object>({
           </Label>
         </div>
       );
-    case "select":
+    }
+    case "select": {
+      const selectOptions = typeof field.options === 'function' 
+        ? field.options(formValues) 
+        : (field.options ?? []);
+      const isDisabled = typeof field.disabled === 'function'
+        ? field.disabled(formValues)
+        : (field.disabled ?? false);
+      
       return (
         <div className="space-y-2" key={field.name}>
           <Label htmlFor={field.name}>{field.label}</Label>
@@ -135,12 +143,13 @@ function FormFieldRenderer<TData extends object>({
                 (field.decode ? field.decode(val) : val) as unknown
               )
             }
+            disabled={isDisabled}
           >
-            <SelectTrigger id={field.name}>
+            <SelectTrigger id={field.name} disabled={isDisabled}>
               <SelectValue placeholder={field.placeholder} />
             </SelectTrigger>
             <SelectContent>
-              {(field.options ?? []).map((opt) => (
+              {selectOptions.map((opt) => (
                 <SelectItem
                   key={(field.encode ? field.encode(opt.value) : String(opt.value))}
                   value={(field.encode ? field.encode(opt.value) : String(opt.value))}
@@ -152,6 +161,7 @@ function FormFieldRenderer<TData extends object>({
           </Select>
         </div>
       );
+    }
     case "icon":
       return (
         <div className="space-y-2" key={field.name}>

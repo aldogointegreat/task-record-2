@@ -169,7 +169,7 @@ export function DisciplinaNivelList() {
         deleteConfirm={{
           title: 'Eliminar Disciplina de Nivel',
           description: (row) =>
-            `¿Está seguro de que desea eliminar "${row.CODIGO} - ${row.DESCRIPCION}"? Esta acción no se puede deshacer.`,
+            row ? `¿Está seguro de que desea eliminar "${row.CODIGO} - ${row.DESCRIPCION}"? Esta acción no se puede deshacer.` : '¿Está seguro de que desea eliminar este registro? Esta acción no se puede deshacer.',
           confirmLabel: 'Eliminar',
           cancelLabel: 'Cancelar',
           successMessage: 'Disciplina de nivel eliminada exitosamente',

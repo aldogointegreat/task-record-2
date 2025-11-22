@@ -21,7 +21,8 @@ export interface FormField<TData extends object> {
   className?: string;
   readOnly?: boolean;
   step?: string;
-  options?: { value: unknown; label: string }[];
+  options?: { value: unknown; label: string }[] | ((formValues: Record<string, unknown>) => { value: unknown; label: string }[]);
+  disabled?: boolean | ((formValues: Record<string, unknown>) => boolean);
   encode?: (v: unknown) => string;
   decode?: (s: string) => unknown;
   parse?: (raw: string | boolean) => unknown;

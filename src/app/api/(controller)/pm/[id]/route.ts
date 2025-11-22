@@ -88,6 +88,10 @@ export async function PUT(
       updates.push('CONJUNTO = @CONJUNTO');
       queryParams.CONJUNTO = body.CONJUNTO;
     }
+    if (body.PLT !== undefined) {
+      updates.push('PLT = @PLT');
+      queryParams.PLT = body.PLT;
+    }
     if (body.PROGRAMACION !== undefined) {
       updates.push('PROGRAMACION = @PROGRAMACION');
       queryParams.PROGRAMACION = body.PROGRAMACION;

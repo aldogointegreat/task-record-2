@@ -6,12 +6,13 @@ import { format } from "date-fns";
 
 interface PMColumnsProps {
   niveles?: Nivel[];
+  nivelesTodos?: Nivel[];
   updatingIds?: Set<number>;
   deletingIds?: Set<number>;
 }
 
 export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
-  const { niveles = [], updatingIds = new Set(), deletingIds = new Set() } = props || {};
+  const { niveles = [], nivelesTodos = [], updatingIds = new Set(), deletingIds = new Set() } = props || {};
 
   return [
     {
@@ -24,24 +25,26 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
     },
     {
       accessorKey: "IDN",
-      header: "IDN",
-      cell: ({ row }) => (
-        <EditableCell<PM, "IDN">
-          row={row}
-          field="IDN"
-          inputType="select"
-          meta={{
-            options: [
-              ...niveles.map((nivel) => ({
-                value: nivel.IDN,
-                label: `${nivel.IDN} - ${nivel.NOMBRE}`,
-              })),
-            ],
-            encode: (v: unknown) => String(v),
-            decode: (s: string) => Number(s),
-          }}
-        />
-      ),
+      header: "ACTIVO",
+      cell: ({ row }) => {
+        return (
+          <EditableCell<PM, "IDN">
+            row={row}
+            field="IDN"
+            inputType="select"
+            meta={{
+              options: nivelesTodos
+                .filter(n => n.IDJ === 5)
+                .map((nivel) => ({
+                  value: nivel.IDN,
+                  label: nivel.NOMBRE,
+                })),
+              encode: (v: unknown) => String(v),
+              decode: (s: string) => Number(s),
+            }}
+          />
+        );
+      },
     },
     {
       accessorKey: "NRO",
@@ -57,13 +60,51 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
     {
       accessorKey: "CONJUNTO",
       header: "CONJUNTO",
-      cell: ({ row }) => (
-        <EditableCell<PM, "CONJUNTO">
-          row={row}
-          field="CONJUNTO"
-          inputType="number"
-        />
-      ),
+      cell: ({ row }) => {
+        return (
+          <EditableCell<PM, "CONJUNTO">
+            row={row}
+            field="CONJUNTO"
+            inputType="select"
+            meta={{
+              options: nivelesTodos
+                .filter(n => n.IDJ === 4)
+                .map((nivel) => ({
+                  value: nivel.IDN,
+                  label: nivel.NOMBRE,
+                })),
+              encode: (v: unknown) => String(v),
+              decode: (s: string) => Number(s),
+            }}
+          />
+        );
+      },
+    },
+    {
+      accessorKey: "PLT",
+      header: "PLANTILLA",
+      cell: ({ row }) => {
+        const conjunto = row.original.CONJUNTO;
+        const nivelesFiltrados = nivelesTodos.filter(nivel => nivel.IDNP === conjunto);
+        return (
+          <EditableCell<PM, "PLT">
+            row={row}
+            field="PLT"
+            inputType="select"
+            meta={{
+              options: [
+                { value: null, label: 'Sin PLT' },
+                ...nivelesFiltrados.map((nivel) => ({
+                  value: nivel.IDN,
+                  label: nivel.NOMBRE,
+                })),
+              ],
+              encode: (v: unknown) => v === null || v === undefined ? '__null__' : String(v),
+              decode: (s: string) => s === '__null__' ? null : Number(s),
+            }}
+          />
+        );
+      },
     },
     {
       accessorKey: "PROGRAMACION",
@@ -170,7 +211,7 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
     },
     {
       id: "actions",
-      header: "Acciones",
+      header: "ACCIONES",
       cell: ({ row, table }) => {
         const meta = table.options.meta;
         const isUpdating = updatingIds.has(row.original.IDPM);

@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 export function PMList() {
   const [pms, setPMs] = useState<PM[]>([]);
   const [niveles, setNiveles] = useState<Nivel[]>([]);
+  const [nivelesTodos, setNivelesTodos] = useState<Nivel[]>([]); // Todos los niveles para filtrar CONJUNTO
   const [loading, setLoading] = useState(true);
   const [updatingIds, setUpdatingIds] = useState<Set<number>>(new Set());
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
@@ -37,11 +38,12 @@ export function PMList() {
         setPMs(pmResult.data);
       }
       if (nivelesResult.success && nivelesResult.data) {
-        // Filtrar niveles: excluir los que tengan GENERADO=true, PLANTILLA=true o que tengan registros en PM
+        // Guardar todos los niveles para usar en el select de CONJUNTO
+        setNivelesTodos(nivelesResult.data);
+        
+        // Filtrar niveles: excluir los que tengan PLANTILLA=true o que tengan registros en PM
         const pmIds = new Set(pmResult.data?.map(pm => pm.IDN) || []);
         const nivelesFiltrados = nivelesResult.data.filter(nivel => {
-          // Excluir si tiene GENERADO = true (GEN)
-          if (nivel.GENERADO) return false;
           // Excluir si tiene PLANTILLA = true (PLT)
           if (nivel.PLANTILLA) return false;
           // Excluir si tiene registros en PM (PM)
@@ -49,12 +51,11 @@ export function PMList() {
           return true;
         });
         
-        // Imprimir en consola para debug
-        console.log('=== IDNs filtrados para PM ===');
-        console.log('Total niveles originales:', nivelesResult.data.length);
-        console.log('Niveles filtrados (disponibles para PM):', nivelesFiltrados.length);
-        console.log('Objetos IDN filtrados:', nivelesFiltrados);
-        console.log('IDs de niveles excluidos (tienen PM):', Array.from(pmIds));
+        // Imprimir en consola solo los niveles con PLANTILLA = 1
+        const nivelesConPlantilla = nivelesResult.data.filter(nivel => nivel.PLANTILLA === true);
+        console.log('=== IDNs con PLANTILLA = 1 ===');
+        console.log('Niveles con PLANTILLA = 1:', nivelesConPlantilla);
+        console.log('Cantidad:', nivelesConPlantilla.length);
         console.log('================================');
         
         setNiveles(nivelesFiltrados);
@@ -93,6 +94,7 @@ export function PMList() {
         IDN: data.IDN,
         NRO: data.NRO,
         CONJUNTO: data.CONJUNTO,
+        PLT: data.PLT ?? null,
         PROGRAMACION: formatDate(data.PROGRAMACION),
         ESTADO: data.ESTADO,
         HOROMETRO: data.HOROMETRO ?? 0,
@@ -145,6 +147,7 @@ export function PMList() {
         IDN: data.IDN,
         NRO: data.NRO,
         CONJUNTO: data.CONJUNTO,
+        PLT: data.PLT ?? null,
         PROGRAMACION: formatDate(data.PROGRAMACION),
         ESTADO: data.ESTADO,
         HOROMETRO: data.HOROMETRO,
@@ -204,6 +207,7 @@ export function PMList() {
 
   const columns = createPMColumns({ 
     niveles,
+    nivelesTodos,
     updatingIds,
     deletingIds,
   });
@@ -229,16 +233,65 @@ export function PMList() {
           cancelLabel: 'Cancelar',
           fields: [
             {
+              name: 'CONJUNTO',
+              label: 'CONJUNTO',
+              inputType: 'select',
+              required: true,
+              options: nivelesTodos
+                .filter(nivel => nivel.IDJ === 4)
+                .map((nivel) => ({
+                  value: nivel.IDN,
+                  label: nivel.NOMBRE,
+                })),
+              encode: (v) => String(v),
+              decode: (s) => Number(s),
+            },
+            {
               name: 'IDN',
               label: 'IDN',
               inputType: 'select',
               required: true,
-              options: niveles.map((nivel) => ({
-                value: nivel.IDN,
-                label: `${nivel.IDN} - ${nivel.NOMBRE}`,
-              })),
+              options: (formValues) => {
+                const conjuntoSeleccionado = formValues.CONJUNTO;
+                if (!conjuntoSeleccionado) {
+                  return [];
+                }
+                return nivelesTodos
+                  .filter(nivel => 
+                    nivel.IDJ === 5 && 
+                    nivel.IDNP === conjuntoSeleccionado
+                  )
+                  .map((nivel) => ({
+                    value: nivel.IDN,
+                    label: nivel.NOMBRE,
+                  }));
+              },
+              disabled: (formValues) => !formValues.CONJUNTO,
               encode: (v) => String(v),
               decode: (s) => Number(s),
+            },
+            {
+              name: 'PLT',
+              label: 'PLANTILLA',
+              inputType: 'select',
+              required: false,
+              options: (formValues) => {
+                const conjuntoSeleccionado = formValues.CONJUNTO;
+                if (!conjuntoSeleccionado) {
+                  return [];
+                }
+                return nivelesTodos
+                  .filter(nivel => 
+                    nivel.IDNP === conjuntoSeleccionado
+                  )
+                  .map((nivel) => ({
+                    value: nivel.IDN,
+                    label: nivel.NOMBRE,
+                  }));
+              },
+              disabled: (formValues) => !formValues.CONJUNTO,
+              encode: (v) => v === null || v === undefined ? '' : String(v),
+              decode: (s) => s === '' ? null : Number(s),
             },
             {
               name: 'NRO',
@@ -246,13 +299,6 @@ export function PMList() {
               inputType: 'number',
               required: true,
               placeholder: 'Ingrese el número',
-            },
-            {
-              name: 'CONJUNTO',
-              label: 'CONJUNTO',
-              inputType: 'number',
-              required: true,
-              placeholder: 'Ingrese el conjunto',
             },
             {
               name: 'PROGRAMACION',
