@@ -28,21 +28,21 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
       header: "ACTIVO",
       cell: ({ row }) => {
         return (
-          <EditableCell<PM, "IDN">
-            row={row}
-            field="IDN"
-            inputType="select"
-            meta={{
+        <EditableCell<PM, "IDN">
+          row={row}
+          field="IDN"
+          inputType="select"
+          meta={{
               options: nivelesTodos
                 .filter(n => n.IDJ === 5)
                 .map((nivel) => ({
-                  value: nivel.IDN,
+                value: nivel.IDN,
                   label: nivel.NOMBRE,
-                })),
-              encode: (v: unknown) => String(v),
-              decode: (s: string) => Number(s),
-            }}
-          />
+              })),
+            encode: (v: unknown) => String(v),
+            decode: (s: string) => Number(s),
+          }}
+        />
         );
       },
     },
@@ -62,9 +62,9 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
       header: "CONJUNTO",
       cell: ({ row }) => {
         return (
-          <EditableCell<PM, "CONJUNTO">
-            row={row}
-            field="CONJUNTO"
+        <EditableCell<PM, "CONJUNTO">
+          row={row}
+          field="CONJUNTO"
             inputType="select"
             meta={{
               options: nivelesTodos
@@ -102,7 +102,7 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
               encode: (v: unknown) => v === null || v === undefined ? '__null__' : String(v),
               decode: (s: string) => s === '__null__' ? null : Number(s),
             }}
-          />
+        />
         );
       },
     },

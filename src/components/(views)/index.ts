@@ -18,3 +18,5 @@ export * from './(tables)/condicion-acceso/CondicionAccesoList';
 export * from './(tables)/disciplina-tarea/DisciplinaTareaList';
 export * from './(tables)/disciplina-nivel/DisciplinaNivelList';
 export * from './(tables)/pauta/PMList';
+export * from './(tables)/pauta/REPNivelList';
+export * from './(tables)/pauta/REPActividadList';

@@ -209,6 +209,44 @@ export default function Home() {
                   </CardDescription>
                 </CardContent>
               </Card>
+              <Card
+                className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-violet-500/10 text-violet-500 border-violet-500/20 hover:bg-violet-500/20"
+                onClick={() => handleNavigation('/rep-nivel')}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-violet-500/10">
+                      <Layers className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-lg">Repetición de Niveles</CardTitle>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="text-sm">
+                    Gestión de niveles de repetición (REP_NIVEL)
+                  </CardDescription>
+                </CardContent>
+              </Card>
+              <Card
+                className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-fuchsia-500/10 text-fuchsia-500 border-fuchsia-500/20 hover:bg-fuchsia-500/20"
+                onClick={() => handleNavigation('/rep-actividad')}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-fuchsia-500/10">
+                      <ListChecks className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-lg">Repetición de Actividades</CardTitle>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="text-sm">
+                    Gestión de actividades de repetición (REP_ACTIVIDAD)
+                  </CardDescription>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>

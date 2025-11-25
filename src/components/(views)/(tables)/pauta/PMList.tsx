@@ -240,9 +240,9 @@ export function PMList() {
               options: nivelesTodos
                 .filter(nivel => nivel.IDJ === 4)
                 .map((nivel) => ({
-                  value: nivel.IDN,
+                value: nivel.IDN,
                   label: nivel.NOMBRE,
-                })),
+              })),
               encode: (v) => String(v),
               decode: (s) => Number(s),
             },

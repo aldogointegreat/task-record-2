@@ -18,3 +18,5 @@ export * from './condicion-acceso.model';
 export * from './disciplina-tarea.model';
 export * from './disciplina-nivel.model';
 export * from './pm.model';
+export * from './rep-nivel.model';
+export * from './rep-actividad.model';

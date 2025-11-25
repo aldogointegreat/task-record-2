@@ -18,3 +18,5 @@ export * from './condicion-acceso-api';
 export * from './disciplina-tarea-api';
 export * from './disciplina-nivel-api';
 export * from './pm-api';
+export * from './rep-nivel-api';
+export * from './rep-actividad-api';
