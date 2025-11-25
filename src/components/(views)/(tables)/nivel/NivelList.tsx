@@ -1,23 +1,31 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { TankTable, type LoadingStates } from '@/lib/utils/tanktable-enhanted';
-import { 
-  getAllNiveles, 
-  createNivel, 
-  updateNivel, 
+import { useState, useEffect } from "react";
+import { TankTable, type LoadingStates } from "@/lib/utils/tanktable-enhanted";
+import {
+  getAllNiveles,
+  createNivel,
+  updateNivel,
   deleteNivel,
   getAllJerarquias,
-  getAllDisciplinasNivel
-} from '@/lib/api';
-import type { Nivel, CreateNivelDTO, UpdateNivelDTO, Jerarquia, DisciplinaNivel } from '@/models';
-import { createNivelColumns } from './nivel-columns';
-import { toast } from 'sonner';
+  getAllDisciplinasNivel,
+} from "@/lib/api";
+import type {
+  Nivel,
+  CreateNivelDTO,
+  UpdateNivelDTO,
+  Jerarquia,
+  DisciplinaNivel,
+} from "@/models";
+import { createNivelColumns } from "./nivel-columns";
+import { toast } from "sonner";
 
 export function NivelList() {
   const [niveles, setNiveles] = useState<Nivel[]>([]);
   const [jerarquias, setJerarquias] = useState<Jerarquia[]>([]);
-  const [disciplinasNivel, setDisciplinasNivel] = useState<DisciplinaNivel[]>([]);
+  const [disciplinasNivel, setDisciplinasNivel] = useState<DisciplinaNivel[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [updatingIds, setUpdatingIds] = useState<Set<number>>(new Set());
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
@@ -30,11 +38,12 @@ export function NivelList() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [nivelesResult, jerarquiasResult, disciplinasNivelResult] = await Promise.all([
-        getAllNiveles(),
-        getAllJerarquias(),
-        getAllDisciplinasNivel(),
-      ]);
+      const [nivelesResult, jerarquiasResult, disciplinasNivelResult] =
+        await Promise.all([
+          getAllNiveles(),
+          getAllJerarquias(),
+          getAllDisciplinasNivel(),
+        ]);
 
       if (nivelesResult.success && nivelesResult.data) {
         setNiveles(nivelesResult.data);
@@ -46,8 +55,8 @@ export function NivelList() {
         setDisciplinasNivel(disciplinasNivelResult.data);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
-      toast.error('Error al cargar los datos');
+      console.error("Error loading data:", error);
+      toast.error("Error al cargar los datos");
     } finally {
       setLoading(false);
     }
@@ -58,10 +67,10 @@ export function NivelList() {
       setCreating(true);
       // Validación: Si es plantilla, no puede ser genérico
       if (data.PLANTILLA && data.GENERICO) {
-        toast.error('Un nivel plantilla no puede ser genérico');
-        throw new Error('Un nivel plantilla no puede ser genérico');
+        toast.error("Un nivel plantilla no puede ser genérico");
+        throw new Error("Un nivel plantilla no puede ser genérico");
       }
-      
+
       const createData: CreateNivelDTO = {
         IDJ: data.IDJ,
         IDNP: data.IDNP ?? null,
@@ -69,7 +78,7 @@ export function NivelList() {
         PLANTILLA: data.PLANTILLA ?? false,
         NROPM: data.NROPM ?? 0,
         ICONO: data.ICONO,
-        GENERICO: data.PLANTILLA ? false : (data.GENERICO ?? false), // Si es plantilla, forzar a false
+        GENERICO: data.PLANTILLA ? false : data.GENERICO ?? false, // Si es plantilla, forzar a false
         COMENTARIO: data.COMENTARIO,
         ID_USR: data.ID_USR,
         ID_DISCIPLINA_NIVEL: data.ID_DISCIPLINA_NIVEL ?? null,
@@ -81,14 +90,14 @@ export function NivelList() {
       if (result.success && result.data) {
         setNiveles((prev) => [...prev, result.data!]);
       } else {
-        const errorMessage = result.message || 'Error al crear nivel';
+        const errorMessage = result.message || "Error al crear nivel";
         toast.error(errorMessage);
         throw new Error(errorMessage);
       }
     } catch (error) {
-      console.error('Error creating nivel:', error);
+      console.error("Error creating nivel:", error);
       if (!(error instanceof Error && error.message)) {
-        toast.error('Error al crear nivel');
+        toast.error("Error al crear nivel");
       }
       throw error;
     } finally {
@@ -101,10 +110,10 @@ export function NivelList() {
       setUpdatingIds((prev) => new Set(prev).add(data.IDN));
       // Validación: Si es plantilla, no puede ser genérico
       if (data.PLANTILLA && data.GENERICO) {
-        toast.error('Un nivel plantilla no puede ser genérico');
-        throw new Error('Un nivel plantilla no puede ser genérico');
+        toast.error("Un nivel plantilla no puede ser genérico");
+        throw new Error("Un nivel plantilla no puede ser genérico");
       }
-      
+
       const updateData: UpdateNivelDTO = {
         IDJ: data.IDJ,
         IDNP: data.IDNP ?? null,
@@ -122,16 +131,14 @@ export function NivelList() {
       const result = await updateNivel(data.IDN, updateData);
       if (result.success && result.data) {
         setNiveles((prev) =>
-          prev.map((nivel) =>
-            nivel.IDN === data.IDN ? result.data! : nivel
-          )
+          prev.map((nivel) => (nivel.IDN === data.IDN ? result.data! : nivel))
         );
       } else {
-        toast.error(result.message || 'Error al actualizar nivel');
+        toast.error(result.message || "Error al actualizar nivel");
       }
     } catch (error) {
-      console.error('Error updating nivel:', error);
-      toast.error('Error al actualizar nivel');
+      console.error("Error updating nivel:", error);
+      toast.error("Error al actualizar nivel");
     } finally {
       setUpdatingIds((prev) => {
         const next = new Set(prev);
@@ -146,15 +153,13 @@ export function NivelList() {
       setDeletingIds((prev) => new Set(prev).add(data.IDN));
       const result = await deleteNivel(data.IDN);
       if (result.success) {
-        setNiveles((prev) =>
-          prev.filter((nivel) => nivel.IDN !== data.IDN)
-        );
+        setNiveles((prev) => prev.filter((nivel) => nivel.IDN !== data.IDN));
       } else {
-        toast.error(result.message || 'Error al eliminar nivel');
+        toast.error(result.message || "Error al eliminar nivel");
       }
     } catch (error) {
-      console.error('Error deleting nivel:', error);
-      toast.error('Error al eliminar nivel');
+      console.error("Error deleting nivel:", error);
+      toast.error("Error al eliminar nivel");
     } finally {
       setDeletingIds((prev) => {
         const next = new Set(prev);
@@ -169,7 +174,7 @@ export function NivelList() {
     loadingRows: 8,
   };
 
-  const columns = createNivelColumns({ 
+  const columns = createNivelColumns({
     jerarquias,
     niveles,
     disciplinasNivel,
@@ -187,27 +192,27 @@ export function NivelList() {
         addButtonLabel="Agregar Nivel"
         loadingStates={loadingStates}
         exportOptions={{
-          formats: ['csv', 'json'],
-          filename: 'niveles',
+          formats: ["csv", "json"],
+          filename: "niveles",
         }}
         onRowSave={handleUpdate}
         onRowDelete={handleDelete}
         createForm={{
-          title: 'Agregar Nuevo Nivel',
-          submitLabel: creating ? 'Creando...' : 'Crear',
-          cancelLabel: 'Cancelar',
+          title: "Agregar Nuevo Nivel",
+          submitLabel: creating ? "Creando..." : "Crear",
+          cancelLabel: "Cancelar",
           fields: [
             {
-              name: 'NOMBRE',
-              label: 'Nombre',
-              inputType: 'text',
+              name: "NOMBRE",
+              label: "Nombre",
+              inputType: "text",
               required: true,
-              placeholder: 'Ingrese el nombre del nivel',
+              placeholder: "Ingrese el nombre del nivel",
             },
             {
-              name: 'IDJ',
-              label: 'Jerarquía',
-              inputType: 'select',
+              name: "IDJ",
+              label: "Jerarquía",
+              inputType: "select",
               required: true,
               options: jerarquias.map((jer) => ({
                 value: jer.IDJ,
@@ -217,84 +222,86 @@ export function NivelList() {
               decode: (s) => Number(s),
             },
             {
-              name: 'ID_DISCIPLINA_NIVEL',
-              label: 'Disciplina',
-              inputType: 'select',
+              name: "ID_DISCIPLINA_NIVEL",
+              label: "Disciplina",
+              inputType: "select",
               required: false,
               options: [
-                { value: null, label: 'Sin disciplina' },
+                { value: null, label: "Sin disciplina" },
                 ...disciplinasNivel.map((disc) => ({
                   value: disc.ID_DISCIPLINA_NIVEL,
                   label: `${disc.CODIGO} - ${disc.DESCRIPCION}`,
                 })),
               ],
-              encode: (v) => (v === null || v === undefined ? '__null__' : String(v)),
-              decode: (s) => (s === '__null__' ? null : Number(s)),
+              encode: (v) =>
+                v === null || v === undefined ? "__null__" : String(v),
+              decode: (s) => (s === "__null__" ? null : Number(s)),
             },
             {
-              name: 'IDNP',
-              label: 'Nivel Padre',
-              inputType: 'select',
+              name: "IDNP",
+              label: "Nivel Padre",
+              inputType: "select",
               options: [
-                { value: null, label: 'Sin nivel padre (Raíz)' },
+                { value: null, label: "Sin nivel padre (Raíz)" },
                 ...niveles.map((nivel) => ({
                   value: nivel.IDN,
                   label: `${nivel.NOMBRE} (${nivel.IDN})`,
                 })),
               ],
-              encode: (v) => (v === null || v === undefined ? '__null__' : String(v)),
-              decode: (s) => (s === '__null__' ? null : Number(s)),
+              encode: (v) =>
+                v === null || v === undefined ? "__null__" : String(v),
+              decode: (s) => (s === "__null__" ? null : Number(s)),
             },
             {
-              name: 'PLANTILLA',
-              label: 'Plantilla',
-              inputType: 'checkbox',
+              name: "PLANTILLA",
+              label: "Plantilla",
+              inputType: "checkbox",
             },
             {
-              name: 'GENERICO',
-              label: 'Genérico',
-              inputType: 'checkbox',
+              name: "GENERICO",
+              label: "Genérico",
+              inputType: "checkbox",
             },
             {
-              name: 'UNIDAD_MANTENIBLE',
-              label: 'Unidad Mantenible',
-              inputType: 'checkbox',
+              name: "UNIDAD_MANTENIBLE",
+              label: "Unidad Mantenible",
+              inputType: "checkbox",
             },
             {
-              name: 'NROPM',
-              label: 'Número de PM',
-              inputType: 'number',
-              placeholder: '0',
+              name: "NROPM",
+              label: "Número de PM",
+              inputType: "number",
+              placeholder: "0",
             },
             {
-              name: 'COMENTARIO',
-              label: 'Comentario',
-              inputType: 'textarea',
-              placeholder: 'Comentario opcional',
+              name: "COMENTARIO",
+              label: "Comentario",
+              inputType: "textarea",
+              placeholder: "Comentario opcional",
             },
             {
-              name: 'ID_USR',
-              label: 'ID Usuario',
-              inputType: 'number',
-              placeholder: 'ID de usuario',
+              name: "ID_USR",
+              label: "ID Usuario",
+              inputType: "number",
+              placeholder: "ID de usuario",
             },
             {
-              name: 'ICONO',
-              label: 'Ícono',
-              inputType: 'icon',
-              placeholder: 'Seleccionar ícono...',
+              name: "ICONO",
+              label: "Ícono",
+              inputType: "icon",
+              placeholder: "Seleccionar ícono...",
             },
           ],
           onSubmit: handleCreate,
-          successMessage: 'Nivel creado exitosamente',
+          successMessage: "Nivel creado exitosamente",
         }}
         deleteConfirm={{
-          title: 'Eliminar Nivel',
+          title: "Eliminar Nivel",
           description: (row) =>
             `¿Está seguro de que desea eliminar el nivel "${row.NOMBRE}"? Esta acción no se puede deshacer.`,
-          confirmLabel: 'Eliminar',
-          cancelLabel: 'Cancelar',
-          successMessage: 'Nivel eliminado exitosamente',
+          confirmLabel: "Eliminar",
+          cancelLabel: "Cancelar",
+          successMessage: "Nivel eliminado exitosamente",
         }}
         updateSuccessMessage="Nivel actualizado exitosamente"
       />
