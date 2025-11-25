@@ -248,7 +248,7 @@ export function PMList() {
             },
             {
               name: 'IDN',
-              label: 'IDN',
+              label: 'ACTIVO',
               inputType: 'select',
               required: true,
               options: (formValues) => {
@@ -286,7 +286,7 @@ export function PMList() {
                   )
                   .map((nivel) => ({
                     value: nivel.IDN,
-                    label: nivel.NOMBRE,
+                    label: `${nivel.IDN} - ${nivel.NOMBRE}`,
                   }));
               },
               disabled: (formValues) => !formValues.CONJUNTO,

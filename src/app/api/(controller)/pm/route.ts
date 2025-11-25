@@ -150,10 +150,80 @@ export async function POST(request: NextRequest) {
     };
 
     const result = await query<PM>(sqlQuery, params);
+    const nuevoPM = result[0];
+
+    // Si se seleccionó una PLT, crear registros en REP_NIVEL para los hijos de la plantilla
+    if (body.PLT !== null && body.PLT !== undefined) {
+      try {
+        // Obtener todos los hijos de la PLT (niveles donde IDNP = PLT)
+        const hijosPLT = await query<{
+          IDN: number;
+          IDJ: number;
+          IDNP: number | null;
+          NOMBRE: string;
+        }>(
+          'SELECT IDN, IDJ, IDNP, NOMBRE FROM [NIVEL] WHERE IDNP = @PLT',
+          { PLT: body.PLT }
+        );
+
+        // Insertar cada hijo en REP_NIVEL
+        if (hijosPLT.length > 0) {
+          for (const hijo of hijosPLT) {
+            // IDNP debería ser igual a PLT ya que son hijos directos
+            const idnp = hijo.IDNP ?? body.PLT;
+            
+            // Insertar en REP_NIVEL y obtener el IDRN generado
+            const repNivelResult = await query<{ IDRN: number }>(
+              `INSERT INTO [REP_NIVEL] (IDPM, IDN, IDJ, IDNP, DESCRIPCION)
+               OUTPUT INSERTED.IDRN
+               VALUES (@IDPM, @IDN, @IDJ, @IDNP, @DESCRIPCION)`,
+              {
+                IDPM: nuevoPM.IDPM,
+                IDN: hijo.IDN,
+                IDJ: hijo.IDJ,
+                IDNP: idnp,
+                DESCRIPCION: hijo.NOMBRE,
+              }
+            );
+            
+            const idrn = repNivelResult[0]?.IDRN;
+            
+            if (idrn) {
+              // Buscar todas las actividades del nivel en ACTIVIDAD_NIVEL donde IDT es NULL
+              const actividadesNivel = await query<{
+                ORDEN: number;
+                DESCRIPCION: string;
+              }>(
+                'SELECT ORDEN, DESCRIPCION FROM [ACTIVIDAD_NIVEL] WHERE IDN = @IDN AND IDT IS NULL ORDER BY ORDEN',
+                { IDN: hijo.IDN }
+              );
+              
+              // Crear un registro en REP_ACTIVIDAD por cada actividad encontrada
+              for (const actividad of actividadesNivel) {
+                await query(
+                  `INSERT INTO [REP_ACTIVIDAD] (IDRN, ORDEN, DESCRIPCION, REFERENCIA, DURACION)
+                   VALUES (@IDRN, @ORDEN, @DESCRIPCION, @REFERENCIA, @DURACION)`,
+                  {
+                    IDRN: idrn,
+                    ORDEN: actividad.ORDEN,
+                    DESCRIPCION: actividad.DESCRIPCION,
+                    REFERENCIA: '-', // Valor dummy
+                    DURACION: 1, // Valor dummy
+                  }
+                );
+              }
+            }
+          }
+        }
+      } catch (repNivelError) {
+        console.error('Error al crear registros en REP_NIVEL:', repNivelError);
+        // No fallar la creación del PM si hay error en REP_NIVEL, solo loguear
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      data: result[0],
+      data: nuevoPM,
       message: 'Registro PM creado exitosamente',
     }, { status: 201 });
 
