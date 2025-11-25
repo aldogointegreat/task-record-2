@@ -24,7 +24,7 @@ export const createREPNivelColumns = (props?: REPNivelColumnsProps): ColumnDef<R
     },
     {
       accessorKey: "IDPM",
-      header: "IDPM",
+      header: "PM",
       cell: ({ row }) => {
         return (
           <EditableCell<REPNivel, "IDPM">
@@ -34,7 +34,7 @@ export const createREPNivelColumns = (props?: REPNivelColumnsProps): ColumnDef<R
             meta={{
               options: pms.map((pm) => ({
                 value: pm.IDPM,
-                label: `IDPM ${pm.IDPM}`,
+                label: `PM ${pm.IDPM}`,
               })),
               encode: (v: unknown) => String(v),
               decode: (s: string) => Number(s),

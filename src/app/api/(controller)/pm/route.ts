@@ -168,8 +168,6 @@ export async function POST(request: NextRequest) {
         SET IDENTITY_INSERT [PM] OFF;
       `);
       
-      await transaction.commit();
-      
       // El resultado del INSERT está en el recordset (puede estar en recordsets si hay múltiples resultsets)
       let nuevoPM: PM;
       if (Array.isArray(insertResult.recordsets) && insertResult.recordsets.length > 1) {
@@ -183,18 +181,19 @@ export async function POST(request: NextRequest) {
       }
       
       // Si se seleccionó una PLT, crear registros en REP_NIVEL para los hijos de la plantilla
+      // Esto debe hacerse ANTES del commit para estar dentro de la misma transacción
       if (body.PLT !== null && body.PLT !== undefined) {
         try {
-          // Obtener todos los hijos de la PLT (niveles donde IDNP = PLT) - fuera de transacción
-          const hijosPLT = await query<{
+          // Obtener todos los hijos de la PLT (niveles donde IDNP = PLT) - usar request de la transacción
+          const hijosPLTRequest = new sql.Request(transaction);
+          hijosPLTRequest.input('PLT', body.PLT);
+          const hijosPLTResult = await hijosPLTRequest.query<{
             IDN: number;
             IDJ: number;
             IDNP: number | null;
             NOMBRE: string;
-          }>(
-            'SELECT IDN, IDJ, IDNP, NOMBRE FROM [NIVEL] WHERE IDNP = @PLT',
-            { PLT: body.PLT }
-          );
+          }>('SELECT IDN, IDJ, IDNP, NOMBRE FROM [NIVEL] WHERE IDNP = @PLT');
+          const hijosPLT = hijosPLTResult.recordset;
 
           // Obtener los máximos dentro de la transacción para evitar problemas de concurrencia
           const maxIDRNRequest = new sql.Request(transaction);
@@ -247,14 +246,14 @@ export async function POST(request: NextRequest) {
               }
               
               if (idrn) {
-                // Buscar todas las actividades del nivel en ACTIVIDAD_NIVEL donde IDT es NULL
-                const actividadesNivel = await query<{
+                // Buscar todas las actividades del nivel en ACTIVIDAD_NIVEL donde IDT es NULL - usar request de la transacción
+                const actividadesNivelRequest = new sql.Request(transaction);
+                actividadesNivelRequest.input('IDN', hijo.IDN);
+                const actividadesNivelResult = await actividadesNivelRequest.query<{
                   ORDEN: number;
                   DESCRIPCION: string;
-                }>(
-                  'SELECT ORDEN, DESCRIPCION FROM [ACTIVIDAD_NIVEL] WHERE IDN = @IDN AND IDT IS NULL ORDER BY ORDEN',
-                  { IDN: hijo.IDN }
-                );
+                }>('SELECT ORDEN, DESCRIPCION FROM [ACTIVIDAD_NIVEL] WHERE IDN = @IDN AND IDT IS NULL ORDER BY ORDEN');
+                const actividadesNivel = actividadesNivelResult.recordset;
                 
                 // Crear un registro en REP_ACTIVIDAD por cada actividad encontrada
                 for (const actividad of actividadesNivel) {
@@ -283,9 +282,14 @@ export async function POST(request: NextRequest) {
           }
         } catch (repNivelError) {
           console.error('Error al crear registros en REP_NIVEL:', repNivelError);
-          // No fallar la creación del PM si hay error en REP_NIVEL, solo loguear
+          // Si hay error, hacer rollback de toda la transacción
+          await transaction.rollback();
+          throw repNivelError;
         }
       }
+      
+      // Hacer commit de toda la transacción (PM + REP_NIVEL + REP_ACTIVIDAD)
+      await transaction.commit();
 
       return NextResponse.json({
         success: true,
