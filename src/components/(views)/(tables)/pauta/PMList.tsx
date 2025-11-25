@@ -232,8 +232,14 @@ export function PMList() {
           submitLabel: creating ? 'Creando...' : 'Crear',
           cancelLabel: 'Cancelar',
           getInitialValues: () => {
+            // Obtener la fecha de hoy en formato YYYY-MM-DD
+            const hoy = new Date();
+            const fechaHoy = hoy.toISOString().split('T')[0];
+            
             return {
               NRO: 1, // Valor inicial, se actualizará cuando se seleccione CONJUNTO
+              ESTADO: 'PENDIENTE', // Estado por defecto
+              INICIO: fechaHoy, // Fecha de hoy por defecto
             };
           },
           fields: [
