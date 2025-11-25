@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -83,7 +83,13 @@ function FormFieldRenderer<TData extends object>({
             value={String(value ?? "")}
             placeholder={field.placeholder}
             className={field.className}
-            onChange={(e) => setFieldValue(formValues, setFormValues, field.name, e.target.value)}
+            readOnly={field.readOnly}
+            disabled={field.readOnly}
+            onChange={(e) => {
+              if (!field.readOnly) {
+                setFieldValue(formValues, setFormValues, field.name, e.target.value);
+              }
+            }}
           />
         </div>
       );
@@ -135,14 +141,19 @@ function FormFieldRenderer<TData extends object>({
           <Label htmlFor={field.name}>{field.label}</Label>
           <Select
             value={(field.encode?.(value as unknown) ?? String(value ?? ""))}
-            onValueChange={(val) =>
+            onValueChange={(val) => {
+              const decodedValue = field.decode ? field.decode(val) : val;
               setFieldValue(
                 formValues,
                 setFormValues,
                 field.name,
-                (field.decode ? field.decode(val) : val) as unknown
-              )
-            }
+                decodedValue as unknown
+              );
+              // Ejecutar onChange personalizado si existe
+              if (field.onChange) {
+                field.onChange(decodedValue, formValues, setFormValues, setFieldValue);
+              }
+            }}
             disabled={isDisabled}
           >
             <SelectTrigger id={field.name} disabled={isDisabled}>
@@ -212,6 +223,7 @@ export function CreateFormDialog<TData extends object>({
   onSubmit,
   initialLoading,
 }: CreateFormDialogProps<TData>) {
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">

@@ -26,6 +26,7 @@ export interface FormField<TData extends object> {
   encode?: (v: unknown) => string;
   decode?: (s: string) => unknown;
   parse?: (raw: string | boolean) => unknown;
+  onChange?: (value: unknown, formValues: Record<string, unknown>, setFormValues: React.Dispatch<React.SetStateAction<Record<string, unknown>>>, setFieldValue: (formValues: Record<string, unknown>, setFormValues: React.Dispatch<React.SetStateAction<Record<string, unknown>>>, name: string, value: unknown) => void) => void;
 }
 
 export interface CreateFormConfig<TData extends object> {

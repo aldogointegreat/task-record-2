@@ -231,6 +231,11 @@ export function PMList() {
           title: 'Agregar Nuevo Registro PM',
           submitLabel: creating ? 'Creando...' : 'Crear',
           cancelLabel: 'Cancelar',
+          getInitialValues: () => {
+            return {
+              NRO: 1, // Valor inicial, se actualizará cuando se seleccione CONJUNTO
+            };
+          },
           fields: [
             {
               name: 'CONJUNTO',
@@ -245,6 +250,28 @@ export function PMList() {
               })),
               encode: (v) => String(v),
               decode: (s) => Number(s),
+              onChange: (conjuntoValue, formValues, setFormValues, setFieldValue) => {
+                // Calcular el siguiente NRO basado en el CONJUNTO seleccionado
+                if (conjuntoValue && typeof conjuntoValue === 'number') {
+                  // Filtrar PMs que tengan el mismo CONJUNTO
+                  const pmsMismoConjunto = pms.filter(pm => pm.CONJUNTO === conjuntoValue);
+                  
+                  // Encontrar el máximo NRO
+                  const maxNRO = pmsMismoConjunto.length > 0
+                    ? Math.max(...pmsMismoConjunto.map(pm => pm.NRO))
+                    : 0;
+                  
+                  // El siguiente NRO será maxNRO + 1
+                  const siguienteNRO = maxNRO + 1;
+                  
+                  // Actualizar el valor de NRO usando los nuevos formValues (con el CONJUNTO actualizado)
+                  const updatedFormValues = { ...formValues, CONJUNTO: conjuntoValue };
+                  setFieldValue(updatedFormValues, setFormValues, 'NRO', siguienteNRO);
+                } else {
+                  // Si no hay CONJUNTO seleccionado, establecer NRO en 1
+                  setFieldValue(formValues, setFormValues, 'NRO', 1);
+                }
+              },
             },
             {
               name: 'IDN',
@@ -282,7 +309,8 @@ export function PMList() {
                 }
                 return nivelesTodos
                   .filter(nivel => 
-                    nivel.IDNP === conjuntoSeleccionado
+                    nivel.IDNP === conjuntoSeleccionado &&
+                    nivel.PLANTILLA === true
                   )
                   .map((nivel) => ({
                     value: nivel.IDN,
@@ -298,7 +326,8 @@ export function PMList() {
               label: 'NRO',
               inputType: 'number',
               required: true,
-              placeholder: 'Ingrese el número',
+              placeholder: 'Se calculará automáticamente',
+              readOnly: true,
             },
             {
               name: 'PROGRAMACION',
