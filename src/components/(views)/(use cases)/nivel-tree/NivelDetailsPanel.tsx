@@ -1,20 +1,47 @@
-import { useState } from 'react';
-import type { Nivel, Jerarquia, ActividadNivel, Atributo, UpdateNivelDTO, DisciplinaNivel } from '@/models';
-import { FolderTree, Folder, CheckSquare, Package, MessageSquare, Pencil } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { IconPicker } from '@/components/ui/icon-picker';
-import { NivelActividadesManager } from './NivelActividadesManager';
-import { NivelChildrenManager } from './NivelChildrenManager';
-import { getIconComponent } from '@/lib/constants/app-icons';
-import { updateNivel } from '@/lib/api';
-import { toast } from 'sonner';
+import { useState } from "react";
+import type {
+  Nivel,
+  Jerarquia,
+  ActividadNivel,
+  Atributo,
+  UpdateNivelDTO,
+  DisciplinaNivel,
+} from "@/models";
+import {
+  FolderTree,
+  Folder,
+  CheckSquare,
+  Package,
+  MessageSquare,
+  Pencil,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { NivelActividadesManager } from "./NivelActividadesManager";
+import { NivelChildrenManager } from "./NivelChildrenManager";
+import { getIconComponent } from "@/lib/constants/app-icons";
+import { updateNivel } from "@/lib/api";
+import { toast } from "sonner";
 
 interface NivelDetailsPanelProps {
   nivel: Nivel;
@@ -27,12 +54,21 @@ interface NivelDetailsPanelProps {
   onNivelesChange?: () => void;
 }
 
-export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel = [], atributos = [], disciplinasNivel = [], onActividadesChange, onNivelesChange }: NivelDetailsPanelProps) {
+export function NivelDetailsPanel({
+  nivel,
+  jerarquias,
+  niveles,
+  actividadesNivel = [],
+  atributos = [],
+  disciplinasNivel = [],
+  onActividadesChange,
+  onNivelesChange,
+}: NivelDetailsPanelProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [formData, setFormData] = useState<UpdateNivelDTO>({
     NOMBRE: nivel.NOMBRE,
-    ICONO: nivel.ICONO || '',
-    COMENTARIO: nivel.COMENTARIO || '',
+    ICONO: nivel.ICONO || "",
+    COMENTARIO: nivel.COMENTARIO || "",
     PLANTILLA: nivel.PLANTILLA,
     GENERICO: nivel.GENERICO || false,
     NROPM: nivel.NROPM,
@@ -43,13 +79,17 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
   });
 
   // Buscar la jerarquía correspondiente
-  const jerarquia = jerarquias.find(j => j.IDJ === nivel.IDJ);
-  
+  const jerarquia = jerarquias.find((j) => j.IDJ === nivel.IDJ);
+
   // Buscar el nivel padre si existe
-  const nivelPadre = nivel.IDNP ? niveles.find(n => n.IDN === nivel.IDNP) : null;
+  const nivelPadre = nivel.IDNP
+    ? niveles.find((n) => n.IDN === nivel.IDNP)
+    : null;
 
   const disciplinaNivelSeleccionada = nivel.ID_DISCIPLINA_NIVEL
-    ? disciplinasNivel.find(d => d.ID_DISCIPLINA_NIVEL === nivel.ID_DISCIPLINA_NIVEL)
+    ? disciplinasNivel.find(
+        (d) => d.ID_DISCIPLINA_NIVEL === nivel.ID_DISCIPLINA_NIVEL
+      )
     : null;
 
   // Obtener el icono del nivel (misma lógica que en build-nivel-tree)
@@ -60,8 +100,8 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
   const handleOpenEdit = () => {
     setFormData({
       NOMBRE: nivel.NOMBRE,
-      ICONO: nivel.ICONO || '',
-      COMENTARIO: nivel.COMENTARIO || '',
+      ICONO: nivel.ICONO || "",
+      COMENTARIO: nivel.COMENTARIO || "",
       PLANTILLA: nivel.PLANTILLA,
       GENERICO: nivel.GENERICO || false,
       NROPM: nivel.NROPM,
@@ -76,23 +116,23 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
   const handleSave = async () => {
     // Validación: Si es plantilla, no puede ser genérico
     if (formData.PLANTILLA && formData.GENERICO) {
-      toast.error('Un nivel plantilla no puede ser genérico');
+      toast.error("Un nivel plantilla no puede ser genérico");
       return;
     }
-    
+
     // Asegurar que si es plantilla, GENERICO sea false
     const updateData: UpdateNivelDTO = {
       ...formData,
       GENERICO: formData.PLANTILLA ? false : formData.GENERICO,
     };
-    
+
     const result = await updateNivel(nivel.IDN, updateData);
     if (result.success && result.data) {
-      toast.success('Nivel actualizado correctamente');
+      toast.success("Nivel actualizado correctamente");
       setIsEditDialogOpen(false);
       onNivelesChange?.();
     } else {
-      toast.error(result.message || 'Error al actualizar nivel');
+      toast.error(result.message || "Error al actualizar nivel");
     }
   };
 
@@ -127,7 +167,9 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
           </div>
           <p className="text-sm text-muted-foreground pl-6">
             {jerarquia ? (
-              <span className="font-medium text-foreground">{jerarquia.DESCRIPCION}</span>
+              <span className="font-medium text-foreground">
+                {jerarquia.DESCRIPCION}
+              </span>
             ) : (
               <span className="italic">No encontrada</span>
             )}
@@ -145,7 +187,8 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
           <p className="text-sm text-muted-foreground pl-6">
             {disciplinaNivelSeleccionada ? (
               <span className="font-medium text-foreground">
-                {disciplinaNivelSeleccionada.CODIGO} - {disciplinaNivelSeleccionada.DESCRIPCION}
+                {disciplinaNivelSeleccionada.CODIGO} -{" "}
+                {disciplinaNivelSeleccionada.DESCRIPCION}
               </span>
             ) : (
               <span className="italic">Sin disciplina asignada</span>
@@ -178,13 +221,14 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
           </div>
           <div className="pl-6">
             {nivel.PLANTILLA ? (
-              <Badge variant="default" className="bg-green-500/10 text-green-600 border-green-500/20">
+              <Badge
+                variant="default"
+                className="bg-green-500/10 text-green-600 border-green-500/20"
+              >
                 Sí
               </Badge>
             ) : (
-              <Badge variant="secondary">
-                No
-              </Badge>
+              <Badge variant="secondary">No</Badge>
             )}
           </div>
         </div>
@@ -197,13 +241,14 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
           </div>
           <div className="pl-6">
             {nivel.UNIDAD_MANTENIBLE ? (
-              <Badge variant="default" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+              <Badge
+                variant="default"
+                className="bg-blue-500/10 text-blue-500 border-blue-500/20"
+              >
                 Sí
               </Badge>
             ) : (
-              <Badge variant="secondary">
-                No
-              </Badge>
+              <Badge variant="secondary">No</Badge>
             )}
           </div>
         </div>
@@ -215,13 +260,15 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
             <span className="text-sm font-medium">Número de PM</span>
           </div>
           <p className="text-sm text-muted-foreground pl-6">
-            <span className="font-mono font-medium text-foreground">{nivel.NROPM}</span>
+            <span className="font-mono font-medium text-foreground">
+              {nivel.NROPM}
+            </span>
           </p>
         </div>
 
         {/* Información de hijos */}
         {(() => {
-          const hijosCount = niveles.filter(n => n.IDNP === nivel.IDN).length;
+          const hijosCount = niveles.filter((n) => n.IDNP === nivel.IDN).length;
           if (hijosCount > 0) {
             return (
               <div>
@@ -230,7 +277,8 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
                   <span className="text-sm font-medium">Niveles Hijos</span>
                 </div>
                 <p className="text-sm text-muted-foreground pl-6">
-                  {hijosCount} {hijosCount === 1 ? 'nivel hijo' : 'niveles hijos'}
+                  {hijosCount}{" "}
+                  {hijosCount === 1 ? "nivel hijo" : "niveles hijos"}
                 </p>
               </div>
             );
@@ -259,7 +307,7 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
         <NivelChildrenManager
           nivelPadreId={nivel.IDN}
           nivelPadre={nivel}
-          niveles={niveles.filter(n => n.IDNP === nivel.IDN)}
+          niveles={niveles.filter((n) => n.IDNP === nivel.IDN)}
           jerarquias={jerarquias}
           disciplinasNivel={disciplinasNivel}
           onNivelesChange={onNivelesChange || (() => {})}
@@ -270,7 +318,8 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
       <div className="mt-6 pt-6 border-t border-border">
         <NivelActividadesManager
           nivelId={nivel.IDN}
-          actividades={actividadesNivel.filter(a => a.IDN === nivel.IDN)}
+          nivel={nivel}
+          actividades={actividadesNivel.filter((a) => a.IDN === nivel.IDN)}
           atributos={atributos}
           niveles={niveles}
           onActividadesChange={onActividadesChange || (() => {})}
@@ -288,28 +337,40 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="nombre" className="mb-2 block">Nombre</Label>
+              <Label htmlFor="nombre" className="mb-2 block">
+                Nombre
+              </Label>
               <Input
                 id="nombre"
-                value={formData.NOMBRE || ''}
-                onChange={(e) => setFormData({ ...formData, NOMBRE: e.target.value })}
+                value={formData.NOMBRE || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, NOMBRE: e.target.value })
+                }
                 placeholder="Nombre del nivel"
               />
             </div>
 
             <div>
-              <Label htmlFor="icono" className="mb-2 block">Ícono</Label>
+              <Label htmlFor="icono" className="mb-2 block">
+                Ícono
+              </Label>
               <IconPicker
                 value={formData.ICONO || undefined}
-                onChange={(value) => setFormData({ ...formData, ICONO: value || '' })}
+                onChange={(value) =>
+                  setFormData({ ...formData, ICONO: value || "" })
+                }
               />
             </div>
 
             <div>
-              <Label htmlFor="jerarquia" className="mb-2 block">Jerarquía</Label>
+              <Label htmlFor="jerarquia" className="mb-2 block">
+                Jerarquía
+              </Label>
               <Select
-                value={formData.IDJ?.toString() || ''}
-                onValueChange={(value) => setFormData({ ...formData, IDJ: parseInt(value) })}
+                value={formData.IDJ?.toString() || ""}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, IDJ: parseInt(value) })
+                }
               >
                 <SelectTrigger id="jerarquia">
                   <SelectValue placeholder="Seleccionar jerarquía" />
@@ -325,13 +386,23 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
             </div>
 
             <div>
-              <Label htmlFor="disciplina-nivel" className="mb-2 block">Disciplina</Label>
+              <Label htmlFor="disciplina-nivel" className="mb-2 block">
+                Disciplina
+              </Label>
               <Select
-                value={formData.ID_DISCIPLINA_NIVEL !== null && formData.ID_DISCIPLINA_NIVEL !== undefined ? formData.ID_DISCIPLINA_NIVEL.toString() : '__null__'}
-                onValueChange={(value) => setFormData({ 
-                  ...formData, 
-                  ID_DISCIPLINA_NIVEL: value === '__null__' ? null : parseInt(value)
-                })}
+                value={
+                  formData.ID_DISCIPLINA_NIVEL !== null &&
+                  formData.ID_DISCIPLINA_NIVEL !== undefined
+                    ? formData.ID_DISCIPLINA_NIVEL.toString()
+                    : "__null__"
+                }
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    ID_DISCIPLINA_NIVEL:
+                      value === "__null__" ? null : parseInt(value),
+                  })
+                }
               >
                 <SelectTrigger id="disciplina-nivel">
                   <SelectValue placeholder="Sin disciplina" />
@@ -339,7 +410,10 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
                 <SelectContent>
                   <SelectItem value="__null__">Sin disciplina</SelectItem>
                   {disciplinasNivel.map((disc) => (
-                    <SelectItem key={disc.ID_DISCIPLINA_NIVEL} value={disc.ID_DISCIPLINA_NIVEL.toString()}>
+                    <SelectItem
+                      key={disc.ID_DISCIPLINA_NIVEL}
+                      value={disc.ID_DISCIPLINA_NIVEL.toString()}
+                    >
                       {disc.CODIGO} - {disc.DESCRIPCION}
                     </SelectItem>
                   ))}
@@ -348,18 +422,27 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
             </div>
 
             <div>
-              <Label htmlFor="nivelPadre" className="mb-2 block">Nivel Superior</Label>
+              <Label htmlFor="nivelPadre" className="mb-2 block">
+                Nivel Superior
+              </Label>
               <Select
-                value={formData.IDNP?.toString() || 'null'}
-                onValueChange={(value) => setFormData({ ...formData, IDNP: value === 'null' ? null : parseInt(value) })}
+                value={formData.IDNP?.toString() || "null"}
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    IDNP: value === "null" ? null : parseInt(value),
+                  })
+                }
               >
                 <SelectTrigger id="nivelPadre">
                   <SelectValue placeholder="Sin nivel superior (raíz)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="null">Sin nivel superior (raíz)</SelectItem>
+                  <SelectItem value="null">
+                    Sin nivel superior (raíz)
+                  </SelectItem>
                   {niveles
-                    .filter(n => n.IDN !== nivel.IDN) // Excluir el nivel actual
+                    .filter((n) => n.IDN !== nivel.IDN) // Excluir el nivel actual
                     .map((n) => (
                       <SelectItem key={n.IDN} value={n.IDN.toString()}>
                         {n.NOMBRE}
@@ -370,22 +453,33 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
             </div>
 
             <div>
-              <Label htmlFor="nropm" className="mb-2 block">Número de PM</Label>
+              <Label htmlFor="nropm" className="mb-2 block">
+                Número de PM
+              </Label>
               <Input
                 id="nropm"
                 type="number"
                 value={formData.NROPM || 0}
-                onChange={(e) => setFormData({ ...formData, NROPM: parseInt(e.target.value) || 0 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    NROPM: parseInt(e.target.value) || 0,
+                  })
+                }
                 placeholder="Número de PM"
               />
             </div>
 
             <div>
-              <Label htmlFor="comentario" className="mb-2 block">Comentario</Label>
+              <Label htmlFor="comentario" className="mb-2 block">
+                Comentario
+              </Label>
               <Textarea
                 id="comentario"
-                value={formData.COMENTARIO || ''}
-                onChange={(e) => setFormData({ ...formData, COMENTARIO: e.target.value })}
+                value={formData.COMENTARIO || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, COMENTARIO: e.target.value })
+                }
                 placeholder="Comentario opcional"
                 rows={3}
               />
@@ -399,14 +493,21 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
                   disabled={formData.GENERICO || false} // Deshabilitar si es genérico
                   onCheckedChange={(checked) => {
                     const isPlantilla = checked === true;
-                    setFormData({ 
-                      ...formData, 
+                    setFormData({
+                      ...formData,
                       PLANTILLA: isPlantilla,
-                      GENERICO: isPlantilla ? false : (formData.GENERICO || false) // Si es plantilla, desmarcar genérico
+                      GENERICO: isPlantilla
+                        ? false
+                        : formData.GENERICO || false, // Si es plantilla, desmarcar genérico
                     });
                   }}
                 />
-                <Label htmlFor="plantilla" className={`cursor-pointer ${formData.GENERICO ? 'opacity-50' : ''}`}>
+                <Label
+                  htmlFor="plantilla"
+                  className={`cursor-pointer ${
+                    formData.GENERICO ? "opacity-50" : ""
+                  }`}
+                >
                   Plantilla
                 </Label>
               </div>
@@ -418,14 +519,21 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
                   disabled={formData.PLANTILLA || false} // Deshabilitar si es plantilla
                   onCheckedChange={(checked) => {
                     const isGenerico = checked === true;
-                    setFormData({ 
-                      ...formData, 
+                    setFormData({
+                      ...formData,
                       GENERICO: isGenerico,
-                      PLANTILLA: isGenerico ? false : (formData.PLANTILLA || false) // Si es genérico, desmarcar plantilla
+                      PLANTILLA: isGenerico
+                        ? false
+                        : formData.PLANTILLA || false, // Si es genérico, desmarcar plantilla
                     });
                   }}
                 />
-                <Label htmlFor="generico" className={`cursor-pointer ${formData.PLANTILLA ? 'opacity-50' : ''}`}>
+                <Label
+                  htmlFor="generico"
+                  className={`cursor-pointer ${
+                    formData.PLANTILLA ? "opacity-50" : ""
+                  }`}
+                >
                   Genérico
                 </Label>
               </div>
@@ -441,14 +549,15 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
                     });
                   }}
                 />
-                <Label htmlFor="unidad-mantenible">
-                  Unidad Mantenible
-                </Label>
+                <Label htmlFor="unidad-mantenible">Unidad Mantenible</Label>
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
               Cancelar
             </Button>
             <Button onClick={handleSave} disabled={!formData.NOMBRE}>
@@ -460,4 +569,3 @@ export function NivelDetailsPanel({ nivel, jerarquias, niveles, actividadesNivel
     </div>
   );
 }
-

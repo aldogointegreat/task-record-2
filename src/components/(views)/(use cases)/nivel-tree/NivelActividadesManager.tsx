@@ -54,6 +54,7 @@ interface QuickAddActividadItem {
 
 interface NivelActividadesManagerProps {
   nivelId: number;
+  nivel: Nivel;
   actividades: ActividadNivel[];
   atributos: Atributo[];
   niveles: Nivel[];
@@ -62,6 +63,7 @@ interface NivelActividadesManagerProps {
 
 export function NivelActividadesManager({
   nivelId,
+  nivel,
   actividades,
   atributos,
   niveles,
@@ -102,6 +104,9 @@ export function NivelActividadesManager({
 
   // Filtrar niveles que tengan UNIDAD_MANTENIBLE activo
   const nivelesDestino = niveles.filter((n) => n.UNIDAD_MANTENIBLE === true);
+
+  // Verificar si el nivel actual permite agregar actividades
+  const canAddActivities = nivel.UNIDAD_MANTENIBLE === true;
 
   // Actualizar estado local cuando cambien las actividades del padre
   useEffect(() => {
@@ -535,17 +540,43 @@ export function NivelActividadesManager({
             size="sm"
             variant="outline"
             onClick={handleOpenQuickAdd}
-            title="Agregar varias actividades rápidamente"
+            disabled={!canAddActivities}
+            title={
+              canAddActivities
+                ? "Agregar varias actividades rápidamente"
+                : "Este nivel no es una unidad mantenible"
+            }
           >
             <Zap className="h-3 w-3 mr-1" />
             Rápido
           </Button>
-          <Button size="sm" variant="outline" onClick={handleOpenCreate}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleOpenCreate}
+            disabled={!canAddActivities}
+            title={
+              canAddActivities
+                ? "Agregar actividad"
+                : "Este nivel no es una unidad mantenible"
+            }
+          >
             <Plus className="h-3 w-3 mr-1" />
             Agregar
           </Button>
         </div>
       </div>
+
+      {/* Mensaje informativo si no se pueden agregar actividades */}
+      {!canAddActivities && (
+        <div className="p-3 rounded-lg bg-muted/50 border border-border">
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium">ℹ️ Información:</span> Solo se pueden
+            agregar actividades a niveles marcados como &quot;Unidad
+            Mantenible&quot;.
+          </p>
+        </div>
+      )}
 
       {/* Lista de actividades */}
       {sortedActividades.length === 0 ? (

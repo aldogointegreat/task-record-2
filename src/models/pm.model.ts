@@ -47,5 +47,22 @@ export interface PMFilters {
   ESTADO?: string;
 }
 
+/**
+ * DTO para crear PM desde actividades seleccionadas
+ * (Nueva funcionalidad de creación manual de PMs)
+ */
+export interface CreatePMFromActividadesDTO {
+  // Campos básicos de PM
+  NRO: number;
+  HOROMETRO: number;
+  IDN: number;
+  CONJUNTO: number;
+  PROGRAMACION: Date | string;
+  ESTADO: string;
+  INICIO: Date | string;
+  FIN: Date | string;
+  PLT?: number | null;
 
-
+  // IDs de actividades seleccionadas
+  actividadesIds: number[];
+}

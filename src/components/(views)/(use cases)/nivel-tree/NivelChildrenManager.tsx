@@ -662,41 +662,36 @@ export function NivelChildrenManager({
 
             <div className="space-y-2">
               <div className="flex items-center gap-4">
-                <div className="flex items-center space-x-2">
+                {/* <div className="flex items-center space-x-2 opacity-50">
                   <Checkbox
                     id="plantilla"
                     checked={formData.PLANTILLA}
-                    disabled={formData.GENERICO} // Solo deshabilitar si el hijo es genérico (no pueden ser ambos)
+                    disabled={true}
                     onCheckedChange={(checked) => {
                       const isPlantilla = checked === true;
                       setFormData({
                         ...formData,
                         PLANTILLA: isPlantilla,
-                        GENERICO: isPlantilla ? false : formData.GENERICO, // Si es plantilla, desmarcar genérico
+                        GENERICO: isPlantilla ? false : formData.GENERICO,
                       });
                     }}
                   />
-                  <Label
-                    htmlFor="plantilla"
-                    className={`cursor-pointer ${
-                      formData.GENERICO ? "opacity-50" : ""
-                    }`}
-                  >
-                    Plantilla
+                  <Label htmlFor="plantilla" className="cursor-not-allowed">
+                    Plantilla (deshabilitado)
                   </Label>
-                </div>
+                </div> */}
 
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="generico"
                     checked={formData.GENERICO}
-                    disabled={formData.PLANTILLA} // Deshabilitar si es plantilla
+                    disabled={formData.PLANTILLA}
                     onCheckedChange={(checked) => {
                       const isGenerico = checked === true;
                       setFormData({
                         ...formData,
                         GENERICO: isGenerico,
-                        PLANTILLA: isGenerico ? false : formData.PLANTILLA, // Si es genérico, desmarcar plantilla
+                        PLANTILLA: isGenerico ? false : formData.PLANTILLA,
                       });
                     }}
                   />
@@ -724,22 +719,6 @@ export function NivelChildrenManager({
                   <Label htmlFor="unidad-mantenible">Unidad Mantenible</Label>
                 </div>
               </div>
-
-              {/* Mensaje informativo para plantillas - solo si está marcado como plantilla y el padre NO es genérico */}
-              {formData.PLANTILLA && !nivelPadre.GENERICO && (
-                <p className="text-xs text-amber-600 dark:text-amber-400 pl-6">
-                  ⚠ Una plantilla solo puede crearse si su padre es genérico.
-                  Este nivel no se creará.
-                </p>
-              )}
-
-              {/* Mensaje informativo de copia - solo si está marcado como plantilla Y el padre es genérico */}
-              {formData.PLANTILLA && nivelPadre.GENERICO && (
-                <p className="text-xs text-blue-600 dark:text-blue-400 pl-6">
-                  ℹ Se copiará la estructura de &quot;{nivelPadre.NOMBRE}&quot;
-                  (excluyendo plantillas y genéricos)
-                </p>
-              )}
             </div>
 
             <div>
@@ -898,27 +877,22 @@ export function NivelChildrenManager({
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 opacity-50">
                 <Checkbox
                   id="edit-plantilla"
                   checked={formData.PLANTILLA}
-                  disabled={formData.GENERICO} // Deshabilitar si es genérico
+                  disabled={true}
                   onCheckedChange={(checked) => {
                     const isPlantilla = checked === true;
                     setFormData({
                       ...formData,
                       PLANTILLA: isPlantilla,
-                      GENERICO: isPlantilla ? false : formData.GENERICO, // Si es plantilla, desmarcar genérico
+                      GENERICO: isPlantilla ? false : formData.GENERICO,
                     });
                   }}
                 />
-                <Label
-                  htmlFor="edit-plantilla"
-                  className={`cursor-pointer ${
-                    formData.GENERICO ? "opacity-50" : ""
-                  }`}
-                >
-                  Plantilla
+                <Label htmlFor="edit-plantilla" className="cursor-not-allowed">
+                  Plantilla (deshabilitado)
                 </Label>
               </div>
 
@@ -926,13 +900,13 @@ export function NivelChildrenManager({
                 <Checkbox
                   id="edit-generico"
                   checked={formData.GENERICO}
-                  disabled={formData.PLANTILLA} // Deshabilitar si es plantilla
+                  disabled={formData.PLANTILLA}
                   onCheckedChange={(checked) => {
                     const isGenerico = checked === true;
                     setFormData({
                       ...formData,
                       GENERICO: isGenerico,
-                      PLANTILLA: isGenerico ? false : formData.PLANTILLA, // Si es genérico, desmarcar plantilla
+                      PLANTILLA: isGenerico ? false : formData.PLANTILLA,
                     });
                   }}
                 />
