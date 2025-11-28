@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, Users, BookOpen, Shield, Layers, Tag, Package, Network, ListChecks, FolderTree, ClipboardList } from 'lucide-react';
+import { ArrowRight, Users, BookOpen, Shield, Layers, Tag, Package, Network, ListChecks, FolderTree, ClipboardList, FilePlus, Calendar } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -210,6 +210,25 @@ export default function Home() {
                 </CardContent>
               </Card>
               <Card
+                className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
+                onClick={() => handleNavigation('/pautas-nueva')}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-sky-500/10">
+                      <FilePlus className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-lg">Pautas Nueva</CardTitle>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="text-sm">
+                    Creación de pautas de mantenimiento con filtros avanzados
+                  </CardDescription>
+                </CardContent>
+              </Card>
+              <Card
                 className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-violet-500/10 text-violet-500 border-violet-500/20 hover:bg-violet-500/20"
                 onClick={() => handleNavigation('/rep-nivel')}
               >
@@ -244,6 +263,25 @@ export default function Home() {
                 <CardContent className="pt-0">
                   <CardDescription className="text-sm">
                     Gestión de actividades de repetición (REP_ACTIVIDAD)
+                  </CardDescription>
+                </CardContent>
+              </Card>
+              <Card
+                className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] bg-lime-500/10 text-lime-500 border-lime-500/20 hover:bg-lime-500/20"
+                onClick={() => handleNavigation('/programacion-pautas')}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-lime-500/10">
+                      <Calendar className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-lg">Programación de Pautas</CardTitle>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="text-sm">
+                    Programación y gestión de pautas de mantenimiento
                   </CardDescription>
                 </CardContent>
               </Card>

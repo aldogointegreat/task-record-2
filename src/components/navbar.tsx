@@ -58,8 +58,10 @@ const navSections: NavSection[] = [
     title: 'Otras Herramientas',
     items: [
       { title: 'Mantención de Pautas', href: '/pautas' },
+      { title: 'Pautas Nueva', href: '/pautas-nueva' },
       { title: 'Repetición de Niveles', href: '/rep-nivel' },
       { title: 'Repetición de Actividades', href: '/rep-actividad' },
+      { title: 'Programación de Pautas', href: '/programacion-pautas' },
     ],
   },
 ];
