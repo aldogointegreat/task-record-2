@@ -90,7 +90,12 @@ export default function ProgramacionPautasPage() {
   const semana = `Semana ${numeroSemana}`;
   const dias = ['1', '2', '3', '4', '5', '6', '7'];
   const camData = ['CAM9', 'CAM20', 'CAM8', 'CAM15', 'CAM12', 'CAM25', 'CAM30'];
-  const pmData = ['PM500horas', 'PM1000horas', 'PM2000horas', 'PM500horas', 'PM1500horas', 'PM800horas', 'PM1200horas'];
+  const pmData = ['PM500', 'PM1000', 'PM2000', 'PM500', 'PM1500', 'PM800', 'PM1200'];
+  const ultimaPMData = ['PM500', 'PM300', 'PM800', 'PM200', 'PM600', 'PM400', 'PM700'];
+
+  // Obtener el horómetro de la columna seleccionada
+  const horometroSeleccionado = columnaSeleccionada !== null ? pmData[columnaSeleccionada] : null;
+  const tituloPautas = horometroSeleccionado ? `Pautas de ${horometroSeleccionado}` : 'Pautas';
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -106,7 +111,7 @@ export default function ProgramacionPautasPage() {
         <div className="lg:col-span-1">
           <Card>
             <CardHeader>
-              <CardTitle>Pautas</CardTitle>
+              <CardTitle>{tituloPautas}</CardTitle>
             </CardHeader>
             <CardContent>
               {loadingPautas ? (
@@ -166,7 +171,7 @@ export default function ProgramacionPautasPage() {
                         </TableHead>
                       </TableRow>
                       <TableRow className="bg-[#2a2a2a] hover:bg-[#2a2a2a] border-b border-[#3a3a3a]">
-                        <TableHead className="text-white font-bold px-4 py-3">día</TableHead>
+                        <TableHead className="text-white font-bold px-4 py-3">Día</TableHead>
                         {dias.map((dia, index) => (
                           <TableHead 
                             key={index} 
@@ -228,6 +233,28 @@ export default function ProgramacionPautasPage() {
                             }`}
                           >
                             {pm}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                      
+                      {/* Fila de Última PM realizada */}
+                      <TableRow className="bg-[#1a1a1a] hover:!bg-[#1a1a1a] border-b border-[#3a3a3a]">
+                        <TableCell className="text-white font-medium px-4 py-3">Última PM realizada</TableCell>
+                        {ultimaPMData.map((ultimaPM, index) => (
+                          <TableCell 
+                            key={index} 
+                            onClick={() => handleColumnaClick(index)}
+                            onMouseEnter={() => handleColumnaHover(index)}
+                            onMouseLeave={() => handleColumnaHover(null)}
+                            className={`text-white text-center px-4 py-3 cursor-pointer transition-all ${
+                              columnaSeleccionada === index 
+                                ? 'bg-[#252525]' 
+                                : columnaHover === index
+                                ? 'bg-[#252525]'
+                                : ''
+                            }`}
+                          >
+                            {ultimaPM}
                           </TableCell>
                         ))}
                       </TableRow>
