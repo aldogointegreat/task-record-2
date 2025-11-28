@@ -28,6 +28,10 @@ export async function GET(request: NextRequest) {
     if (searchParams.has('ESTADO')) {
       filters.ESTADO = searchParams.get('ESTADO') || undefined;
     }
+    if (searchParams.has('HOROMETRO')) {
+      const horometro = searchParams.get('HOROMETRO');
+      if (horometro) filters.HOROMETRO = parseInt(horometro);
+    }
 
     // Construir condiciones WHERE
     let whereClause = 'WHERE 1=1';
@@ -48,6 +52,10 @@ export async function GET(request: NextRequest) {
     if (filters.ESTADO) {
       whereClause += ' AND ESTADO = @ESTADO';
       params.ESTADO = filters.ESTADO;
+    }
+    if (filters.HOROMETRO !== undefined) {
+      whereClause += ' AND HOROMETRO = @HOROMETRO';
+      params.HOROMETRO = filters.HOROMETRO;
     }
 
     // Ejecutar query

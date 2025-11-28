@@ -14,6 +14,7 @@ export interface PM {
   HOROMETRO: number;
   INICIO: Date | string;
   FIN: Date | string;
+  TITULO?: string | null;
 }
 
 export interface CreatePMDTO {
@@ -45,6 +46,7 @@ export interface PMFilters {
   NRO?: number;
   CONJUNTO?: number;
   ESTADO?: string;
+  HOROMETRO?: number;
 }
 
 /**

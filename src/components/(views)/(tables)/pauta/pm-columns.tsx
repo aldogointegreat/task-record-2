@@ -24,6 +24,17 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
       },
     },
     {
+      accessorKey: "TITULO",
+      header: "TITULO",
+      cell: ({ row }) => (
+        <EditableCell<PM, "TITULO">
+          row={row}
+          field="TITULO"
+          inputType="text"
+        />
+      ),
+    },
+    {
       accessorKey: "IDN",
       header: "ACTIVO",
       cell: ({ row }) => {

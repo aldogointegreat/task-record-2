@@ -16,6 +16,8 @@ export async function getAllPM(
     if (filters?.CONJUNTO !== undefined)
       params.append("CONJUNTO", filters.CONJUNTO.toString());
     if (filters?.ESTADO) params.append("ESTADO", filters.ESTADO);
+    if (filters?.HOROMETRO !== undefined)
+      params.append("HOROMETRO", filters.HOROMETRO.toString());
 
     const url = `/api/pm${params.toString() ? `?${params.toString()}` : ""}`;
     const response = await fetch(url);
