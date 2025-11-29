@@ -63,6 +63,7 @@ export interface CreatePMFromActividadesDTO {
   ESTADO: string;
   INICIO: Date | string;
   FIN: Date | string;
+  TITULO?: string;
   PLT?: number | null;
 
   // IDs de actividades seleccionadas

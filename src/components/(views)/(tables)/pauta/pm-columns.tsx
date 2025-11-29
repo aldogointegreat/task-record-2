@@ -1,6 +1,9 @@
 import { ColumnDef } from "@tanstack/react-table";
 import type { PM, Nivel } from "@/models";
-import { ActionsCell, EditableCell } from "@/lib/utils/tanktable-enhanted/component/actions-cell";
+import {
+  ActionsCell,
+  EditableCell,
+} from "@/lib/utils/tanktable-enhanted/component/actions-cell";
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -9,10 +12,17 @@ interface PMColumnsProps {
   nivelesTodos?: Nivel[];
   updatingIds?: Set<number>;
   deletingIds?: Set<number>;
+  renderActividadesCell?: (pm: PM) => React.ReactNode;
 }
 
 export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
-  const { niveles = [], nivelesTodos = [], updatingIds = new Set(), deletingIds = new Set() } = props || {};
+  const {
+    niveles = [],
+    nivelesTodos = [],
+    updatingIds = new Set(),
+    deletingIds = new Set(),
+    renderActividadesCell,
+  } = props || {};
 
   return [
     {
@@ -27,11 +37,7 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
       accessorKey: "TITULO",
       header: "TITULO",
       cell: ({ row }) => (
-        <EditableCell<PM, "TITULO">
-          row={row}
-          field="TITULO"
-          inputType="text"
-        />
+        <EditableCell<PM, "TITULO"> row={row} field="TITULO" inputType="text" />
       ),
     },
     {
@@ -39,21 +45,21 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
       header: "ACTIVO",
       cell: ({ row }) => {
         return (
-        <EditableCell<PM, "IDN">
-          row={row}
-          field="IDN"
-          inputType="select"
-          meta={{
+          <EditableCell<PM, "IDN">
+            row={row}
+            field="IDN"
+            inputType="select"
+            meta={{
               options: nivelesTodos
-                .filter(n => n.IDJ === 5)
+                .filter((n) => n.IDJ === 5)
                 .map((nivel) => ({
-                value: nivel.IDN,
+                  value: nivel.IDN,
                   label: nivel.NOMBRE,
-              })),
-            encode: (v: unknown) => String(v),
-            decode: (s: string) => Number(s),
-          }}
-        />
+                })),
+              encode: (v: unknown) => String(v),
+              decode: (s: string) => Number(s),
+            }}
+          />
         );
       },
     },
@@ -61,11 +67,7 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
       accessorKey: "NRO",
       header: "NRO",
       cell: ({ row }) => (
-        <EditableCell<PM, "NRO">
-          row={row}
-          field="NRO"
-          inputType="number"
-        />
+        <EditableCell<PM, "NRO"> row={row} field="NRO" inputType="number" />
       ),
     },
     {
@@ -73,13 +75,13 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
       header: "CONJUNTO",
       cell: ({ row }) => {
         return (
-        <EditableCell<PM, "CONJUNTO">
-          row={row}
-          field="CONJUNTO"
+          <EditableCell<PM, "CONJUNTO">
+            row={row}
+            field="CONJUNTO"
             inputType="select"
             meta={{
               options: nivelesTodos
-                .filter(n => n.IDJ === 4)
+                .filter((n) => n.IDJ === 4)
                 .map((nivel) => ({
                   value: nivel.IDN,
                   label: nivel.NOMBRE,
@@ -96,7 +98,9 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
       header: "PLANTILLA",
       cell: ({ row }) => {
         const conjunto = row.original.CONJUNTO;
-        const nivelesFiltrados = nivelesTodos.filter(nivel => nivel.IDNP === conjunto);
+        const nivelesFiltrados = nivelesTodos.filter(
+          (nivel) => nivel.IDNP === conjunto
+        );
         return (
           <EditableCell<PM, "PLT">
             row={row}
@@ -104,16 +108,17 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
             inputType="select"
             meta={{
               options: [
-                { value: null, label: 'Sin PLT' },
+                { value: null, label: "Sin PLT" },
                 ...nivelesFiltrados.map((nivel) => ({
                   value: nivel.IDN,
                   label: nivel.NOMBRE,
                 })),
               ],
-              encode: (v: unknown) => v === null || v === undefined ? '__null__' : String(v),
-              decode: (s: string) => s === '__null__' ? null : Number(s),
+              encode: (v: unknown) =>
+                v === null || v === undefined ? "__null__" : String(v),
+              decode: (s: string) => (s === "__null__" ? null : Number(s)),
             }}
-        />
+          />
         );
       },
     },
@@ -128,14 +133,14 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
             inputType="date"
             meta={{
               format: (v: unknown) => {
-                if (!v) return '';
+                if (!v) return "";
                 if (v instanceof Date) return format(v, "yyyy-MM-dd");
-                if (typeof v === 'string') {
+                if (typeof v === "string") {
                   // Manejar diferentes formatos de fecha
-                  const dateStr = v.split('T')[0].split(' ')[0];
+                  const dateStr = v.split("T")[0].split(" ")[0];
                   return dateStr;
                 }
-                return '';
+                return "";
               },
             }}
           />
@@ -152,8 +157,8 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
           inputType="select"
           meta={{
             options: [
-              { value: 'COMPLETADO', label: 'COMPLETADO' },
-              { value: 'PENDIENTE', label: 'PENDIENTE' },
+              { value: "COMPLETADO", label: "COMPLETADO" },
+              { value: "PENDIENTE", label: "PENDIENTE" },
             ],
             encode: (v: unknown) => String(v),
             decode: (s: string) => s,
@@ -183,13 +188,13 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
             inputType="date"
             meta={{
               format: (v: unknown) => {
-                if (!v) return '';
+                if (!v) return "";
                 if (v instanceof Date) return format(v, "yyyy-MM-dd");
-                if (typeof v === 'string') {
-                  const dateStr = v.split('T')[0].split(' ')[0];
+                if (typeof v === "string") {
+                  const dateStr = v.split("T")[0].split(" ")[0];
                   return dateStr;
                 }
-                return '';
+                return "";
               },
             }}
           />
@@ -207,17 +212,27 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
             inputType="date"
             meta={{
               format: (v: unknown) => {
-                if (!v) return '';
+                if (!v) return "";
                 if (v instanceof Date) return format(v, "yyyy-MM-dd");
-                if (typeof v === 'string') {
-                  const dateStr = v.split('T')[0].split(' ')[0];
+                if (typeof v === "string") {
+                  const dateStr = v.split("T")[0].split(" ")[0];
                   return dateStr;
                 }
-                return '';
+                return "";
               },
             }}
           />
         );
+      },
+    },
+    {
+      id: "actividades",
+      header: "ACTIVIDADES",
+      cell: ({ row }) => {
+        if (renderActividadesCell) {
+          return renderActividadesCell(row.original);
+        }
+        return null;
       },
     },
     {
@@ -227,18 +242,18 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
         const meta = table.options.meta;
         const isUpdating = updatingIds.has(row.original.IDPM);
         const isDeleting = deletingIds.has(row.original.IDPM);
-        
+
         if (isUpdating || isDeleting) {
           return (
             <div className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               <span className="text-xs text-muted-foreground">
-                {isUpdating ? 'Guardando...' : 'Eliminando...'}
+                {isUpdating ? "Guardando..." : "Eliminando..."}
               </span>
             </div>
           );
         }
-        
+
         return (
           <ActionsCell
             row={row}
@@ -253,4 +268,3 @@ export const createPMColumns = (props?: PMColumnsProps): ColumnDef<PM>[] => {
 
 // Export default columns for backward compatibility
 export const pmColumns = createPMColumns();
-

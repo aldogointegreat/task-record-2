@@ -124,12 +124,13 @@ export async function POST(request: NextRequest) {
       request.input("HOROMETRO", body.HOROMETRO ?? 0);
       request.input("INICIO", body.INICIO);
       request.input("FIN", body.FIN);
+      request.input("TITULO", body.TITULO ?? null);
 
       const insertPMResult = await request.query(`
         SET IDENTITY_INSERT [PM] ON;
-        INSERT INTO [PM] (IDPM, IDN, NRO, CONJUNTO, PLT, PROGRAMACION, ESTADO, HOROMETRO, INICIO, FIN)
+        INSERT INTO [PM] (IDPM, IDN, NRO, CONJUNTO, PLT, PROGRAMACION, ESTADO, HOROMETRO, INICIO, FIN, TITULO)
         OUTPUT INSERTED.*
-        VALUES (@IDPM, @IDN, @NRO, @CONJUNTO, @PLT, @PROGRAMACION, @ESTADO, @HOROMETRO, @INICIO, @FIN);
+        VALUES (@IDPM, @IDN, @NRO, @CONJUNTO, @PLT, @PROGRAMACION, @ESTADO, @HOROMETRO, @INICIO, @FIN, @TITULO);
         SET IDENTITY_INSERT [PM] OFF;
       `);
 

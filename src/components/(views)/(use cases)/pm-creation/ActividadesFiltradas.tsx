@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { ActividadFiltrada } from "@/models";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -16,13 +16,29 @@ import { Badge } from "@/components/ui/badge";
 interface ActividadesFiltradasProps {
   actividades: ActividadFiltrada[];
   onSelectionChange: (selectedIds: number[]) => void;
+  initialSelectedIds?: number[];
 }
 
 export function ActividadesFiltradas({
   actividades,
   onSelectionChange,
+  initialSelectedIds = [],
 }: ActividadesFiltradasProps) {
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(
+    () => new Set(initialSelectedIds)
+  );
+
+  // Use ref to track if we've already initialized
+  const prevInitialIdsRef = useRef<string>("");
+
+  // Only update when the actual IDs change, not the array reference
+  useEffect(() => {
+    const newIdsKey = JSON.stringify([...initialSelectedIds].sort());
+    if (prevInitialIdsRef.current !== newIdsKey) {
+      prevInitialIdsRef.current = newIdsKey;
+      setSelectedIds(new Set(initialSelectedIds));
+    }
+  }, [initialSelectedIds]);
 
   const toggleSelection = (actividadId: number) => {
     const newSelection = new Set(selectedIds);
@@ -61,35 +77,33 @@ export function ActividadesFiltradas({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {selectedIds.size} de {actividades.length} actividades seleccionadas
         </p>
       </div>
 
-      <div className="border rounded-lg max-w-full">
-        <div className="h-[400px] overflow-x-auto overflow-y-auto max-w-[85vw] ml-3 block">
+      <div className="border rounded-lg overflow-hidden">
+        <div className="overflow-x-auto max-h-[300px] overflow-y-auto">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 bg-background z-10 border-b">
               <TableRow>
-                <TableHead className="w-12 sticky left-0 bg-background z-10">
+                <TableHead className="w-[50px] sticky left-0 bg-background z-20 border-r">
                   <Checkbox
                     checked={isAllSelected}
                     onCheckedChange={toggleSelectAll}
                   />
                 </TableHead>
-                <TableHead className="min-w-[180px]">Nivel</TableHead>
-                <TableHead className="w-16">Orden</TableHead>
-                <TableHead className="min-w-[300px]">Descripción</TableHead>
-                <TableHead className="min-w-[200px]">Funcionalidad</TableHead>
-                <TableHead className="min-w-[200px]">
-                  Tarea Mantención
-                </TableHead>
-                <TableHead className="min-w-[120px]">Frecuencia</TableHead>
-                <TableHead className="min-w-[150px]">Disciplina</TableHead>
-                <TableHead className="min-w-[150px]">Clase</TableHead>
-                <TableHead className="min-w-[150px]">Acceso</TableHead>
+                <TableHead className="w-[160px]">Nivel</TableHead>
+                <TableHead className="w-[70px] text-center">Orden</TableHead>
+                <TableHead className="w-[250px]">Descripción</TableHead>
+                <TableHead className="w-[150px]">Funcionalidad</TableHead>
+                <TableHead className="w-[150px]">Tarea Mantención</TableHead>
+                <TableHead className="w-[100px]">Frecuencia</TableHead>
+                <TableHead className="w-[120px]">Disciplina</TableHead>
+                <TableHead className="w-[120px]">Clase</TableHead>
+                <TableHead className="w-[120px]">Acceso</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -100,7 +114,7 @@ export function ActividadesFiltradas({
                     selectedIds.has(actividad.IDA) ? "bg-muted/50" : ""
                   }
                 >
-                  <TableCell className="sticky left-0 bg-background z-10">
+                  <TableCell className="sticky left-0 bg-background z-10 border-r">
                     <Checkbox
                       checked={selectedIds.has(actividad.IDA)}
                       onCheckedChange={() => toggleSelection(actividad.IDA)}
@@ -108,11 +122,13 @@ export function ActividadesFiltradas({
                   </TableCell>
                   <TableCell className="font-medium">
                     <div className="flex flex-col gap-1">
-                      <span>{actividad.NIVEL_NOMBRE}</span>
+                      <span className="text-xs leading-tight">
+                        {actividad.NIVEL_NOMBRE}
+                      </span>
                       {actividad.JERARQUIA_NOMBRE && (
                         <Badge
                           variant="outline"
-                          className="w-fit text-xs"
+                          className="w-fit text-[10px] px-1 py-0"
                           style={
                             actividad.JERARQUIA_COLOR
                               ? {
@@ -127,10 +143,12 @@ export function ActividadesFiltradas({
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{actividad.ORDEN}</TableCell>
+                  <TableCell className="text-center font-mono text-xs">
+                    {actividad.ORDEN}
+                  </TableCell>
                   <TableCell>
                     <div
-                      className="max-w-[300px]"
+                      className="text-xs leading-tight"
                       title={actividad.DESCRIPCION}
                     >
                       {actividad.DESCRIPCION}
@@ -138,7 +156,7 @@ export function ActividadesFiltradas({
                   </TableCell>
                   <TableCell>
                     <div
-                      className="max-w-[200px] text-sm text-muted-foreground"
+                      className="text-xs text-muted-foreground leading-tight"
                       title={actividad.FUNCIONALIDAD || ""}
                     >
                       {actividad.FUNCIONALIDAD || "-"}
@@ -146,31 +164,25 @@ export function ActividadesFiltradas({
                   </TableCell>
                   <TableCell>
                     <div
-                      className="max-w-[200px] text-sm"
+                      className="text-xs leading-tight"
                       title={actividad.TAREA_MANTENCION || ""}
                     >
                       {actividad.TAREA_MANTENCION || "-"}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-xs">
                     {actividad.FRECUENCIA_TAREA && actividad.UNIDAD_FRECUENCIA
                       ? `${actividad.FRECUENCIA_TAREA} ${actividad.UNIDAD_FRECUENCIA}`
                       : "-"}
                   </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {actividad.DISCIPLINA_TAREA_NOMBRE || "-"}
-                    </div>
+                  <TableCell className="text-xs">
+                    {actividad.DISCIPLINA_TAREA_NOMBRE || "-"}
                   </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {actividad.CLASE_MANTENCION_NOMBRE || "-"}
-                    </div>
+                  <TableCell className="text-xs">
+                    {actividad.CLASE_MANTENCION_NOMBRE || "-"}
                   </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {actividad.CONDICION_ACCESO_NOMBRE || "-"}
-                    </div>
+                  <TableCell className="text-xs">
+                    {actividad.CONDICION_ACCESO_NOMBRE || "-"}
                   </TableCell>
                 </TableRow>
               ))}

@@ -68,6 +68,7 @@ export function PMCreacionForm({ onSuccess }: PMCreacionFormProps) {
 
   // Form data
   const [formData, setFormData] = useState({
+    TITULO: "",
     NRO: 1,
     HOROMETRO: 0,
     PROGRAMACION: "",
@@ -158,6 +159,7 @@ export function PMCreacionForm({ onSuccess }: PMCreacionFormProps) {
     setCreating(true);
     try {
       const createData: CreatePMFromActividadesDTO = {
+        TITULO: formData.TITULO,
         NRO: formData.NRO,
         HOROMETRO: formData.HOROMETRO,
         IDN: 1, // Temporal - será implementado después
@@ -222,6 +224,17 @@ export function PMCreacionForm({ onSuccess }: PMCreacionFormProps) {
               <h3 className="font-semibold">Información de la PM</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="col-span-full space-y-2">
+                  <Label htmlFor="titulo">TÍTULO</Label>
+                  <Input
+                    id="titulo"
+                    value={formData.TITULO}
+                    onChange={(e) =>
+                      setFormData({ ...formData, TITULO: e.target.value })
+                    }
+                    placeholder="Ingrese un título para la PM"
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="nro">NRO</Label>
                   <Input

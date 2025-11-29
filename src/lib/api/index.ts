@@ -22,3 +22,4 @@ export * from "./rep-nivel-api";
 export * from "./rep-actividad-api";
 export * from "./actividades-filtradas-api";
 export * from "./pm-desde-actividades-api";
+export * from "./pm-actividades-api";

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { Activity, Menu, ChevronDown, LogOut, User } from 'lucide-react';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { Activity, Menu, ChevronDown, LogOut, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +12,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface NavItem {
   title: string;
@@ -29,39 +30,35 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
-    title: 'Inicio',
+    title: "Inicio",
+    items: [{ title: "Inicio", href: "/" }],
+  },
+  {
+    title: "Mantención de Niveles",
+    items: [{ title: "Mantención de Niveles", href: "/niveles" }],
+  },
+  {
+    title: "Tablas Maestras",
     items: [
-      { title: 'Inicio', href: '/' },
+      { title: "Usuarios", href: "/usuarios" },
+      { title: "Niveles", href: "/niveles-tabla" },
+      { title: "Disciplinas", href: "/disciplinas" },
+      { title: "Roles", href: "/roles" },
+      { title: "Jerarquías", href: "/jerarquias" },
+      { title: "Atributos", href: "/atributos" },
+      { title: "Atributo Valor", href: "/atributo-valor" },
+      { title: "Entregas", href: "/entregas" },
+      { title: "Actividad Nivel", href: "/actividad-nivel" },
     ],
   },
   {
-    title: 'Mantención de Niveles',
+    title: "Otras Herramientas",
     items: [
-      { title: 'Mantención de Niveles', href: '/niveles' },
-    ],
-  },
-  {
-    title: 'Tablas Maestras',
-    items: [
-      { title: 'Usuarios', href: '/usuarios' },
-      { title: 'Niveles', href: '/niveles-tabla' },
-      { title: 'Disciplinas', href: '/disciplinas' },
-      { title: 'Roles', href: '/roles' },
-      { title: 'Jerarquías', href: '/jerarquias' },
-      { title: 'Atributos', href: '/atributos' },
-      { title: 'Atributo Valor', href: '/atributo-valor' },
-      { title: 'Entregas', href: '/entregas' },
-      { title: 'Actividad Nivel', href: '/actividad-nivel' },
-    ],
-  },
-  {
-    title: 'Otras Herramientas',
-    items: [
-      { title: 'Mantención de Pautas', href: '/pautas' },
-      { title: 'Pautas Nueva', href: '/pautas-nueva' },
-      { title: 'Repetición de Niveles', href: '/rep-nivel' },
-      { title: 'Repetición de Actividades', href: '/rep-actividad' },
-      { title: 'Programación de Pautas', href: '/programacion-pautas' },
+      { title: "Mantención de Pautas", href: "/pautas" },
+      { title: "Pautas Nueva", href: "/pautas-nueva" },
+      { title: "Repetición de Niveles", href: "/rep-nivel" },
+      { title: "Repetición de Actividades", href: "/rep-actividad" },
+      { title: "Programación de Pautas", href: "/programacion-pautas" },
     ],
   },
 ];
@@ -84,7 +81,7 @@ export function Navbar() {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const response = await fetch('/api/auth/me');
+        const response = await fetch("/api/auth/me");
         if (response.ok) {
           const data = await response.json();
           if (data.success) {
@@ -92,7 +89,7 @@ export function Navbar() {
           }
         }
       } catch (error) {
-        console.error('Error al obtener sesión:', error);
+        console.error("Error al obtener sesión:", error);
       } finally {
         setIsLoading(false);
       }
@@ -103,25 +100,25 @@ export function Navbar() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
       });
 
       if (response.ok) {
-        toast.success('Sesión cerrada exitosamente');
-        router.push('/login');
+        toast.success("Sesión cerrada exitosamente");
+        router.push("/login");
         router.refresh();
       } else {
-        toast.error('Error al cerrar sesión');
+        toast.error("Error al cerrar sesión");
       }
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-      toast.error('Error al conectar con el servidor');
+      console.error("Error al cerrar sesión:", error);
+      toast.error("Error al conectar con el servidor");
     }
   };
 
   // No mostrar el navbar en la página de login por seguridad
-  if (pathname === '/login') {
+  if (pathname === "/login") {
     return null;
   }
 
@@ -134,50 +131,50 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-4">
-        {/* Logo y Título */}
-        <div className="flex items-center gap-3 mr-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Activity className="h-5 w-5 text-primary-foreground" />
+          {/* Logo y Título */}
+          <div className="flex items-center gap-3 mr-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+              <Activity className="h-5 w-5 text-primary-foreground" />
+            </div>
+            {/* <h1 className="text-lg font-bold">Task Record</h1> */}
           </div>
-          {/* <h1 className="text-lg font-bold">Task Record</h1> */}
-        </div>
 
-        {/* Menú Desplegable */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <Menu className="h-4 w-4" />
-              <span>{currentPage?.title || 'Navegación'}</span>
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
+          {/* Menú Desplegable */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Menu className="h-4 w-4" />
+                <span>{currentPage?.title || "Navegación"}</span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-            {navSections.map((section, sectionIndex) => (
-              <div key={section.title}>
-                {sectionIndex > 0 && <DropdownMenuSeparator />}
-                <DropdownMenuGroup>
-                  {/* <DropdownMenuLabel>{section.title}</DropdownMenuLabel> */}
-                  {section.items.map((item) => {
-                    const isActive = pathname === item.href;
-                    return (
-                      <DropdownMenuItem key={item.href} asChild>
-                        <Link
-                          href={item.href}
-                          className={cn(
-                            'cursor-pointer',
-                            isActive && 'bg-accent'
-                          )}
-                        >
-                          {item.title}
-                        </Link>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                </DropdownMenuGroup>
-              </div>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+              {navSections.map((section, sectionIndex) => (
+                <div key={section.title}>
+                  {sectionIndex > 0 && <DropdownMenuSeparator />}
+                  <DropdownMenuGroup>
+                    {/* <DropdownMenuLabel>{section.title}</DropdownMenuLabel> */}
+                    {section.items.map((item) => {
+                      const isActive = pathname === item.href;
+                      return (
+                        <DropdownMenuItem key={item.href} asChild>
+                          <Link
+                            href={item.href}
+                            className={cn(
+                              "cursor-pointer",
+                              isActive && "bg-accent"
+                            )}
+                          >
+                            {item.title}
+                          </Link>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuGroup>
+                </div>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Información del Usuario y Logout */}
@@ -196,15 +193,20 @@ export function Navbar() {
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium">{session.nombre}</p>
-                    <p className="text-xs text-muted-foreground">{session.usuario}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {session.usuario}
+                    </p>
                   </div>
                 </DropdownMenuLabel>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
+            {/* Toggle de Tema */}
+            <ThemeToggle />
+
             {/* Botón de Cerrar Sesión */}
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleLogout}
               className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
             >
