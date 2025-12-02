@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,8 +13,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { getAllPM } from '@/lib/api';
-import type { PM } from '@/models';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { getAllPM, getAllNiveles } from '@/lib/api';
+import type { PM, Nivel } from '@/models';
 
 // Datos constantes para la tabla semanal (fuera del componente para evitar recreaciones)
 const DIAS = ['1', '2', '3', '4', '5', '6', '7'];
@@ -35,8 +42,13 @@ export default function ProgramacionPautasPage() {
   const [loadingPautas, setLoadingPautas] = useState(false);
   
   // Estados para valores editables de la tabla (inicialmente vacíos)
-  const [activoNombres, setActivoNombres] = useState<string[]>(Array(7).fill(''));
+  // Cambiamos activoNombres para almacenar IDN en lugar de nombres
+  const [activoIds, setActivoIds] = useState<number[]>(Array(7).fill(0));
   const [activoHorometros, setActivoHorometros] = useState<string[]>(Array(7).fill(''));
+  
+  // Estado para los niveles con IDJ=5 (activos)
+  const [activos, setActivos] = useState<Nivel[]>([]);
+  const [loadingActivos, setLoadingActivos] = useState(false);
   
   // Estado para tracking de inputs enfocados (para manejar blur correctamente)
   const [inputFocused, setInputFocused] = useState<{ columna: number; tipo: 'activo' | 'horometro' } | null>(null);
@@ -52,9 +64,31 @@ export default function ProgramacionPautasPage() {
   // Datos para la tabla semanal
   const semana = `Semana ${numeroSemana}`;
   
+  // Cargar activos (niveles con IDJ=5) al montar el componente
+  useEffect(() => {
+    const loadActivos = async () => {
+      setLoadingActivos(true);
+      try {
+        const result = await getAllNiveles({ IDJ: 5 });
+        if (result.success && result.data) {
+          setActivos(result.data);
+        } else {
+          setActivos([]);
+        }
+      } catch (error) {
+        console.error('Error al cargar activos:', error);
+        setActivos([]);
+      } finally {
+        setLoadingActivos(false);
+      }
+    };
+    
+    loadActivos();
+  }, []);
+  
   // Resetear datos cuando cambia la semana
   useEffect(() => {
-    setActivoNombres(Array(7).fill(''));
+    setActivoIds(Array(7).fill(0));
     setActivoHorometros(Array(7).fill(''));
     setColumnaSeleccionada(null);
     setInputFocused(null);
@@ -245,11 +279,19 @@ export default function ProgramacionPautasPage() {
     }
   };
   
-  // Función para actualizar el nombre del activo
-  const handleActivoNombreChange = (index: number, value: string) => {
-    const nuevosNombres = [...activoNombres];
-    nuevosNombres[index] = value;
-    setActivoNombres(nuevosNombres);
+  // Función para actualizar el ID del activo seleccionado
+  const handleActivoChange = (index: number, value: string) => {
+    const nuevoId = value ? parseInt(value) : 0;
+    const nuevosIds = [...activoIds];
+    nuevosIds[index] = nuevoId;
+    setActivoIds(nuevosIds);
+  };
+  
+  // Función para obtener el nombre del activo por su ID
+  const getActivoNombre = (idn: number): string => {
+    if (idn === 0) return '';
+    const activo = activos.find(a => a.IDN === idn);
+    return activo ? activo.NOMBRE : '';
   };
   
   // Función para actualizar el horómetro
@@ -267,12 +309,12 @@ export default function ProgramacionPautasPage() {
     if (columnaSeleccionada === null) {
       return false;
     }
-    const activo = activoNombres[columnaSeleccionada];
+    const activoId = activoIds[columnaSeleccionada];
     const horometro = activoHorometros[columnaSeleccionada];
     // El botón está habilitado solo si:
     // 1. Ambos campos (activo y horómetro) están llenos
     // 2. Hay una PM seleccionada de la lista
-    return activo.trim() !== '' && horometro.trim() !== '' && pautaSeleccionada !== null;
+    return activoId !== 0 && horometro.trim() !== '' && pautaSeleccionada !== null;
   };
   
   // Función para manejar el click en "Programar Pauta"
@@ -281,14 +323,16 @@ export default function ProgramacionPautasPage() {
       return;
     }
     
-    const activo = activoNombres[columnaSeleccionada];
+    const activoId = activoIds[columnaSeleccionada];
+    const activoNombre = getActivoNombre(activoId);
     const horometro = activoHorometros[columnaSeleccionada];
     const pauta = pautas.find(p => p.IDPM === pautaSeleccionada);
     
     // Aquí puedes agregar la lógica para programar la pauta
     console.log('Programar pauta:', {
       columna: columnaSeleccionada,
-      activo,
+      activoId,
+      activoNombre,
       horometro,
       semana: numeroSemana,
       pautaId: pautaSeleccionada,
@@ -296,7 +340,7 @@ export default function ProgramacionPautasPage() {
     });
     
     // Por ahora solo mostramos un mensaje (puedes implementar la lógica real después)
-    // toast.success(`Pauta programada para ${activo} con horómetro ${horometro}`);
+    // toast.success(`Pauta programada para ${activoNombre} con horómetro ${horometro}`);
   };
   
   // Función para manejar la selección de una pauta
@@ -417,10 +461,10 @@ export default function ProgramacionPautasPage() {
                     </TableHeader>
                     <TableBody>
                       
-                      {/* Fila de CAM */}
+                      {/* Fila de Activo */}
                       <TableRow className="bg-[#1a1a1a] hover:!bg-[#1a1a1a] border-b border-[#3a3a3a]">
                         <TableCell className="text-white font-medium px-4 py-3">Activo</TableCell>
-                        {activoNombres.map((cam, index) => (
+                        {activoIds.map((activoId, index) => (
                           <TableCell 
                             key={index} 
                             onClick={() => handleColumnaClick(index)}
@@ -434,19 +478,49 @@ export default function ProgramacionPautasPage() {
                             } ${columnaSeleccionada === index ? '' : 'cursor-pointer'}`}
                           >
                             {columnaSeleccionada === index ? (
-                              <Input
-                                type="text"
-                                value={cam}
-                                onChange={(e) => handleActivoNombreChange(index, e.target.value)}
-                                onFocus={() => handleInputFocus(index, 'activo')}
-                                onBlur={() => handleInputBlur(index, 'activo')}
-                                className="w-full bg-[#2a2a2a] border-[#3a3a3a] text-white text-center h-8"
-                                placeholder="Ingrese activo"
-                                onClick={(e) => e.stopPropagation()}
-                              />
+                              <Select
+                                value={activoId !== 0 ? activoId.toString() : ''}
+                                onValueChange={(value) => handleActivoChange(index, value)}
+                                onOpenChange={(open) => {
+                                  if (open) {
+                                    handleInputFocus(index, 'activo');
+                                  } else {
+                                    // Cuando se cierra el Select, manejar el blur
+                                    handleInputBlur(index, 'activo');
+                                  }
+                                }}
+                              >
+                                <SelectTrigger 
+                                  className="w-full bg-[#2a2a2a] border-[#3a3a3a] text-white h-8"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <SelectValue placeholder="Seleccione activo" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#2a2a2a] border-[#3a3a3a]">
+                                  {loadingActivos ? (
+                                    <SelectItem value="loading" disabled>
+                                      Cargando...
+                                    </SelectItem>
+                                  ) : activos.length > 0 ? (
+                                    activos.map((activo) => (
+                                      <SelectItem 
+                                        key={activo.IDN} 
+                                        value={activo.IDN.toString()}
+                                        className="text-white focus:bg-[#3a3a3a]"
+                                      >
+                                        {activo.NOMBRE}
+                                      </SelectItem>
+                                    ))
+                                  ) : (
+                                    <SelectItem value="no-data" disabled>
+                                      No hay activos disponibles
+                                    </SelectItem>
+                                  )}
+                                </SelectContent>
+                              </Select>
                             ) : (
-                              <span className={cam ? '' : 'text-muted-foreground'}>
-                                {cam || '—'}
+                              <span className={activoId !== 0 ? '' : 'text-muted-foreground'}>
+                                {activoId !== 0 ? getActivoNombre(activoId) : '—'}
                               </span>
                             )}
                           </TableCell>
