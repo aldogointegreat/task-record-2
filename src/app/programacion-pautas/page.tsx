@@ -118,10 +118,17 @@ export default function ProgramacionPautasPage() {
   };
 
   // Detectar clics fuera de la tabla para deseleccionar
-  // Excluye el panel de pautas para que no se deseleccione al seleccionar una pauta
+  // Excluye el panel de pautas y el contenido del Select (que se renderiza en un portal)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
+      const target = event.target as HTMLElement;
+      
+      // Verificar si el click está en el contenido del Select (portal)
+      const isSelectContent = target.closest('[data-slot="select-content"]');
+      if (isSelectContent) {
+        return; // No deseleccionar si el click está en el Select
+      }
+      
       // Solo deseleccionar si el click está fuera de la tabla Y fuera del panel de pautas
       if (
         tablaRef.current && 
@@ -247,13 +254,17 @@ export default function ProgramacionPautasPage() {
   };
   
   // Función para manejar el blur de los inputs
-  const handleInputBlur = (index: number, tipo: 'activo' | 'horometro') => {
+  const handleInputBlur = (index: number, tipo: 'activo' | 'horometro', skipDeselection: boolean = false) => {
     // Los datos ya están guardados en el estado
     // Usamos un pequeño delay para permitir que el click en otra celda se procese primero
     setTimeout(() => {
       // Verificar si el input que perdió el foco es el que estaba enfocado
       if (inputFocused?.columna === index && inputFocused?.tipo === tipo) {
         setInputFocused(null);
+        // Si skipDeselection es true (para Select), no deseleccionar la columna
+        if (skipDeselection) {
+          return;
+        }
         // Si la columna sigue seleccionada, verificar si debemos deseleccionarla
         // Esto se manejará cuando ambos inputs pierdan el foco
         if (columnaSeleccionada === index) {
@@ -485,8 +496,11 @@ export default function ProgramacionPautasPage() {
                                   if (open) {
                                     handleInputFocus(index, 'activo');
                                   } else {
-                                    // Cuando se cierra el Select, manejar el blur
-                                    handleInputBlur(index, 'activo');
+                                    // Cuando se cierra el Select, limpiar el foco pero NO deseleccionar la columna
+                                    if (inputFocused?.columna === index && inputFocused?.tipo === 'activo') {
+                                      setInputFocused(null);
+                                    }
+                                    // No llamar a handleInputBlur para evitar deseleccionar la columna
                                   }
                                 }}
                               >
